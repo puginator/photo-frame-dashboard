@@ -31,6 +31,18 @@ export function nightOf(d, cfg) {
   return d.getDay() === 6 ? (isDadWeekend(d, cfg) ? 'dad' : 'mom') : cfg.nights[d.getDay()];
 }
 
+// 'dad' | 'mom': who has the girls at this moment (on a handoff day, last night's house until the handoff hour).
+export function withNow(now, cfg) {
+  var today = day(now), t = nightOf(today, cfg), y = nightOf(addDays(today, -1), cfg);
+  return y !== t && now.getHours() + now.getMinutes() / 60 < cfg.handoffHour[today.getDay()] ? y : t;
+}
+
+// The first date on or after today whose night is with `who` (null if none in 60 days).
+export function nextNightWith(who, now, cfg) {
+  for (var i = 0; i < 60; i++) { var d = addDays(day(now), i); if (nightOf(d, cfg) === who) return d; }
+  return null;
+}
+
 function at(h) { return h === 12 ? 'at noon' : h < 12 ? 'in the morning' : 'in the afternoon'; }
 
 // Given a Date, return { tonight, detail, tomorrow: { tonight, detail } }.

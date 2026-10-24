@@ -64,5 +64,5 @@ import { COUNTDOWNS, CUSTODY } from '../config.js';
     resume: function () { count(); V.show.start(); },
     hide: function () { if (V.show) V.show.stop(); }
   });
-  App.on('minute', function (n) { if (V.el && n.getHours() === 0 && n.getMinutes() === 0) count(); });
+  App.on('minute', function (n) { if (V.el && n.getMinutes() % 30 === 0) count(); });
 })();

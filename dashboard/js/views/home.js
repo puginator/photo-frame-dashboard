@@ -127,11 +127,11 @@ import { lunchFor, loadLunch } from '../lunch.js';
   App.on('minute', function (n) {
     if (!V.el || !V.el.firstChild) return;
     V.el.querySelector('.h-clock').innerHTML = clock();
-    if (n.getMinutes() % 30 === 0) V.el.querySelector('.h-custody').innerHTML = custodyTile();
-    if (n.getHours() === 0 && n.getMinutes() === 0) {
-      V.el.querySelector('.h-lunch').innerHTML = lunchTile();
-      V.el.querySelector('.h-count').innerHTML = countdowns();
+    if (n.getMinutes() % 30 === 0) {
+      V.el.querySelector('.h-custody').innerHTML = custodyTile();
+      V.el.querySelector('.h-count').innerHTML = countdowns(); // the custody countdown flips at handoffs
     }
+    if (n.getHours() === 0 && n.getMinutes() === 0) V.el.querySelector('.h-lunch').innerHTML = lunchTile();
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
