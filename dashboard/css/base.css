@@ -83,7 +83,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 /* ---------------------------------------------------------------- components */
 .card { background: var(--card); border-radius: var(--r); padding: 18px 20px; position: relative; }
 button.card { display: block; width: 100%; }
-button.card:active, .h-hero:active, .h-photo:active { transform: scale(.985); }
+button.card:active, .h-photo:active { transform: scale(.985); }
 
 .avatar {
   flex: none;
