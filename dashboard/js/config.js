@@ -26,3 +26,13 @@ export var WEATHER = {
   ],
   timezone: 'America/Los_Angeles'
 };
+
+// Countdowns: { date, label, emoji? }. date is 'YYYY-MM-DD' (one-off) or 'MM-DD' (every year,
+// e.g. birthdays). Past one-offs drop off on their own. The next weekend at Dad's is added
+// automatically from CUSTODY.
+export var COUNTDOWNS = [
+  { date: '10-31', label: 'Halloween', emoji: '🎃' },
+  { date: '2026-11-26', label: 'Thanksgiving', emoji: '🦃' },
+  { date: '12-25', label: 'Christmas', emoji: '🎄' },
+  { date: '01-01', label: "New Year's Day", emoji: '🎉' }
+];

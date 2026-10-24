@@ -1,6 +1,7 @@
 // Home / Today: the glanceable overview. Never scrolls.
 import { custody } from '../custody.js';
-import { CUSTODY } from '../config.js';
+import { CUSTODY, COUNTDOWNS } from '../config.js';
+import { upcoming, when } from '../countdown.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
@@ -63,6 +64,15 @@ import { lunchFor, loadLunch } from '../lunch.js';
       (n ? '<div class="h-cu-next h-lu-next"><b>' + nextDay + '</b><span>' + App.esc(n.entry.main.split(/:| with | on /)[0]) + '</span></div>' : '');
   }
 
+  function countdowns() {
+    var list = upcoming(App.now(), COUNTDOWNS, CUSTODY, 3);
+    if (!list.length) return '';
+    return '<div class="label">Countdowns</div>' + list.map(function (c) {
+      return '<div class="h-cd' + (c.days === 0 ? ' is-today' : '') + '"><span class="h-cd-e">' + c.emoji + '</span>' +
+        '<span class="h-cd-l">' + App.esc(c.label) + '</span><b>' + when(c.days) + '</b></div>';
+    }).join('');
+  }
+
   // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
   function todo(title, issue) {
     return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
@@ -72,7 +82,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     var el = V.el;
     el.querySelector('.h-clock').innerHTML = clock();
     el.querySelector('.h-weather').innerHTML = weather();
-    el.querySelector('.h-count').innerHTML = todo('Countdowns', 7);
+    el.querySelector('.h-count').innerHTML = countdowns();
     el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = lunchTile();
     el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
@@ -118,7 +128,10 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (!V.el || !V.el.firstChild) return;
     V.el.querySelector('.h-clock').innerHTML = clock();
     if (n.getMinutes() % 30 === 0) V.el.querySelector('.h-custody').innerHTML = custodyTile();
-    if (n.getHours() === 0 && n.getMinutes() === 0) V.el.querySelector('.h-lunch').innerHTML = lunchTile();
+    if (n.getHours() === 0 && n.getMinutes() === 0) {
+      V.el.querySelector('.h-lunch').innerHTML = lunchTile();
+      V.el.querySelector('.h-count').innerHTML = countdowns();
+    }
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
