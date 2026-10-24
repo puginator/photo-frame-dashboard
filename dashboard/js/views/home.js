@@ -1,6 +1,7 @@
 // Home / Today: the glanceable overview. Never scrolls.
 import { custody } from '../custody.js';
 import { CUSTODY } from '../config.js';
+import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
   'use strict';
@@ -46,6 +47,18 @@ import { CUSTODY } from '../config.js';
       '<div class="h-cu-next"><b>Tomorrow</b>' + App.esc(c.tomorrow.detail) + '</div>';
   }
 
+  function lunchTile() {
+    var l = lunchFor(V.menu || {}, App.now());
+    var e = l.today, n = l.next;
+    var nextDay = n && (n.date - App.dayStart(App.now()) === 86400000 ? 'Tomorrow' : App.fmt.day(n.date));
+    return '<div class="label">School lunch</div>' +
+      (e ? (e.notes ? '<div class="h-lu-note">' + App.esc(e.notes) + '</div>' : '') +
+        '<div class="h-lu-main">' + App.esc(e.main) + '</div>' +
+        (e.alt ? '<div class="h-lu-alt">or ' + App.esc(e.alt) + '</div>' : '')
+        : '<div class="h-todo serif"><i>No school lunch today</i></div>') +
+      (n ? '<div class="h-cu-next h-lu-next"><b>' + nextDay + '</b><span>' + App.esc(n.entry.main.split(/:| with | on /)[0]) + '</span></div>' : '');
+  }
+
   // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
   function todo(title, issue) {
     return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
@@ -57,7 +70,7 @@ import { CUSTODY } from '../config.js';
     el.querySelector('.h-weather').innerHTML = weather();
     el.querySelector('.h-count').innerHTML = todo('Countdowns', 7);
     el.querySelector('.h-custody').innerHTML = custodyTile();
-    el.querySelector('.h-lunch').innerHTML = todo('School lunch', 3);
+    el.querySelector('.h-lunch').innerHTML = lunchTile();
     el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
     el.querySelector('.h-fact').innerHTML = todo('Animal fact', 5);
   }
@@ -87,6 +100,7 @@ import { CUSTODY } from '../config.js';
           var g = e.target.closest('[data-go]');
           if (g) App.go(g.dataset.go);
         });
+        loadLunch(function (menu) { V.menu = menu; el.querySelector('.h-lunch').innerHTML = lunchTile(); });
         V.slides = new App.Slideshow(el.querySelector('.h-photo-stage'), { layout: 'cover', captions: false, interval: 12000, onChange: photoCaption });
       }
       paint();
@@ -100,6 +114,7 @@ import { CUSTODY } from '../config.js';
     if (!V.el || !V.el.firstChild) return;
     V.el.querySelector('.h-clock').innerHTML = clock();
     if (n.getMinutes() % 30 === 0) V.el.querySelector('.h-custody').innerHTML = custodyTile();
+    if (n.getHours() === 0 && n.getMinutes() === 0) V.el.querySelector('.h-lunch').innerHTML = lunchTile();
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
