@@ -42,7 +42,7 @@ export function custody(now, cfg) {
   var exT = exception(today, cfg), exM = exception(tmw, cfg);
 
   var detail;
-  if (y !== t && now.getHours() < h) detail = 'With ' + N[y] + ' now. ' + N[t] + ' picks you up ' + at(h).replace('in the', 'this') + '.';
+  if (y !== t && now.getHours() + now.getMinutes() / 60 < h) detail = 'With ' + N[y] + ' now. ' + N[t] + ' picks you up ' + at(h).replace('in the', 'this') + '.';
   else if (m !== t) detail = 'Back with ' + N[m] + ' tomorrow ' + at(hm).replace('in the ', '') + '.';
   else detail = 'With ' + N[t] + ' tomorrow night too.';
   if (exT) detail = exT.note + '. ' + detail;

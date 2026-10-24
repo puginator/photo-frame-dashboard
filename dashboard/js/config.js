@@ -8,9 +8,9 @@ export var CUSTODY = {
   // Any Saturday that is a Dad weekend; every other Saturday after (and before) it is a Mom weekend.
   // On a Mom weekend Dad has Saturday morning and Mom takes over at handoffHour[6].
   dadWeekend: '2026-10-24',
-  // Hour (24h) the girls change houses on a handoff day, by weekday Sun..Sat.
-  // Wed: Mom morning, Dad afternoon. Sat: midday. Sunday is a guess; fix it if it's wrong.
-  handoffHour: [12, 8, 8, 15, 8, 8, 12],
+  // Hour (24h, 13.5 = 1:30 PM) the girls change houses on a handoff day, by weekday Sun..Sat.
+  // Sun: 1:30 PM back to Mom after a Dad weekend. Wed: Mom morning, Dad afternoon. Sat: midday.
+  handoffHour: [13.5, 8, 8, 15, 8, 8, 12],
   // One-off overrides: who has them that night, plus a note shown on the tile.
   exceptions: [
     { date: '2026-10-25', night: 'dad', note: 'Swapped weekend' },

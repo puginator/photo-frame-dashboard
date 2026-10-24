@@ -95,14 +95,12 @@ import { CUSTODY } from '../config.js';
     resume: function () { V.slides.start(); },
     hide: function () { if (V.slides) V.slides.stop(); }
   });
-  // Every minute: just the clock (cheap, even while hidden). Weather and custody on the hour (handoffs are on the hour).
+  // Every minute: just the clock (cheap, even while hidden). Custody on the half hour (handoffs are), weather on the hour.
   App.on('minute', function (n) {
     if (!V.el || !V.el.firstChild) return;
     V.el.querySelector('.h-clock').innerHTML = clock();
-    if (n.getMinutes() === 0) {
-      V.el.querySelector('.h-weather').innerHTML = weather();
-      V.el.querySelector('.h-custody').innerHTML = custodyTile();
-    }
+    if (n.getMinutes() % 30 === 0) V.el.querySelector('.h-custody').innerHTML = custodyTile();
+    if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
 })();
