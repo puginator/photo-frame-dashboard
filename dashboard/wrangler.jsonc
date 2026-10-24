@@ -9,5 +9,7 @@
     "run_worker_first": true
   },
   // Family photos, private: only worker.js reads them (see docs/photos.md).
-  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "home-photos" }]
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "home-photos" }],
+  // Chores: chores:list (the list, edited in the Cloudflare dashboard) and chores:<YYYY-MM-DD> (check-offs).
+  "kv_namespaces": [{ "binding": "CHORES", "id": "1b028e4eaaa444619cad46c787a39415" }]
 }

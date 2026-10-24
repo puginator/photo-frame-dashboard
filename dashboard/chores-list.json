@@ -1,0 +1,14 @@
+{
+  "kids": [
+    { "id": "amelia", "name": "Amelia", "color": "#7C3AED", "rgb": "124 58 237", "ink": "#FFFFFF" },
+    { "id": "eliza", "name": "Eliza", "color": "#E4007C", "rgb": "228 0 124", "ink": "#FFFFFF" },
+    { "id": "junia", "name": "Junia", "color": "#00A36C", "rgb": "0 163 108", "ink": "#FFFFFF" }
+  ],
+  "chores": [
+    { "id": "clear-table", "title": "Help clear the table", "emoji": "🍽️", "who": "each", "stars": 1 },
+    { "id": "tidy-room", "title": "Tidy your room", "emoji": "🛏️", "who": "each", "stars": 1 },
+    { "id": "brush-teeth", "title": "Brush teeth", "emoji": "😁", "who": "each", "stars": 1 },
+    { "id": "clothes", "title": "Lay out tomorrow's clothes", "emoji": "👕", "who": "each", "days": [0, 1, 2, 3, 4], "stars": 1 },
+    { "id": "backpack", "title": "Pack your backpack", "emoji": "🎒", "who": "each", "days": [0, 1, 2, 3, 4], "stars": 1 }
+  ]
+}
