@@ -1,4 +1,5 @@
 import { merge, validEntries } from './js/chores-core.js';
+import { parseICS } from './js/ical.js';
 import SEED_LIST from './chores-list.json' with { type: 'json' };
 
 // Private-by-default gate: the dashboard shows family details (custody, school), so the site 404s
@@ -24,6 +25,7 @@ export default {
     const cookies = (req.headers.get('Cookie') || '').split(/;\s*/);
     if (!cookies.includes('k=' + key)) return new Response('Not found', { status: 404 });
     if (url.pathname === '/manifest.json') return manifest(env);
+    if (url.pathname === '/api/events') return events(req, env);
     if (url.pathname.startsWith('/api/chores/')) return chores(req, env, url.pathname.slice('/api/chores/'.length));
     const m = url.pathname.match(/^\/(photo|thumb)\/(.+\.jpg)$/);
     if (m) return photo(env, (m[1] === 'photo' ? 'photos/' : 'thumbs/') + decodeURIComponent(m[2]));
@@ -62,6 +64,47 @@ async function photo(env, key) {
   if (!obj) return new Response('Not found', { status: 404 });
   // Names include a content hash, so a given URL never changes.
   return new Response(obj.body, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, max-age=31536000, immutable', ETag: obj.httpEtag } });
+}
+
+// Family calendar (docs: docs/calendar.md). The Worker fetches the Google secret iCal feed(s),
+// expands them into a 7-past/60-future-day window, and caches the JSON in KV for 15 minutes.
+// The feed URLs are bearer credentials: wrangler secret put ICAL_URL (comma-separated for more).
+const EVENTS_TTL = 900; // 15 minutes; Google rate-limits anonymous .ics fetches
+const ICS_MAX_BYTES = 2 * 1024 * 1024;
+
+async function events(req, env) {
+  if (req.method !== 'GET') return new Response('Method not allowed', { status: 405 });
+  const cached = await env.CHORES.get('calendar:events', 'json');
+  if (cached && Date.now() - cached.fetchedAt < EVENTS_TTL * 1000) {
+    return Response.json(cached.events, { headers: noStore });
+  }
+  const urls = (env.ICAL_URL || '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (!urls.length) return Response.json(cached ? cached.events : [], { headers: noStore });
+  try {
+    const parts = await Promise.all(urls.map(async (u) => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      try {
+        const r = await fetch(u, { signal: ctrl.signal });
+        if (!r.ok) throw new Error('feed ' + r.status);
+        const len = +(r.headers.get('content-length') || 0);
+        if (len > ICS_MAX_BYTES) throw new Error('feed too large');
+        const text = await r.text();
+        if (text.length > ICS_MAX_BYTES) throw new Error('feed too large');
+        return text;
+      } finally {
+        clearTimeout(timer);
+      }
+    }));
+    const now = Date.now();
+    const merged = [].concat(...parts.map((text) => parseICS(text, now - 7 * 864e5, now + 60 * 864e5)));
+    merged.sort((a, b) => (a.start < b.start ? -1 : 1));
+    await env.CHORES.put('calendar:events', JSON.stringify({ fetchedAt: now, events: merged }), { expirationTtl: 86400 });
+    return Response.json(merged, { headers: noStore });
+  } catch (e) {
+    // Feed unreachable: serve the last good list (even past TTL) rather than an empty calendar.
+    return Response.json(cached ? cached.events : [], { headers: noStore });
+  }
 }
 
 // Chores (docs: docs/chores.md). The frame is the only writer and POSTs its whole day doc, so the
