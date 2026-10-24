@@ -27,10 +27,11 @@ export var WEATHER = {
   timezone: 'America/Los_Angeles'
 };
 
-// Countdowns: { date, label, emoji? }. date is 'YYYY-MM-DD' (one-off) or 'MM-DD' (every year,
-// e.g. birthdays). Past one-offs drop off on their own. The next weekend at Dad's is added
+// Countdowns: { date, label, emoji?, born? }. date is 'YYYY-MM-DD' (one-off) or 'MM-DD' (every
+// year, e.g. birthdays). With born (birth year), {age} in the label becomes the age that day. Past one-offs drop off on their own. The next weekend at Dad's is added
 // automatically from CUSTODY.
 export var COUNTDOWNS = [
+  { date: '10-30', label: 'Eliza turns {age}!', emoji: '🎂', born: 2017 },
   { date: '10-31', label: 'Halloween', emoji: '🎃' },
   { date: '2026-11-26', label: 'Thanksgiving', emoji: '🦃' },
   { date: '12-25', label: 'Christmas', emoji: '🎄' },
