@@ -38,6 +38,13 @@
 /* ---- countdowns (#7) */
 .h-count { grid-column: 10 / 13; display: flex; flex-direction: column; justify-content: flex-end; border-bottom: 3px solid var(--ink); padding: 2px 0 10px; }
 
+.h-count .label { margin-bottom: 6px; }
+.h-cd { display: flex; align-items: center; gap: 8px; min-height: 40px; font-size: 18px; }
+.h-cd-e { width: 26px; font-size: 22px; text-align: center; flex: none; }
+.h-cd-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-cd b { font-weight: 800; font-stretch: 80%; white-space: nowrap; }
+.h-cd.is-today b { color: var(--alert); text-transform: uppercase; letter-spacing: .06em; }
+
 /* ---- main column: custody + lunch (#2, #3), would-you-rather (#6) */
 .h-main { grid-column: 1 / 8; display: grid; grid-template-rows: 232px 1fr; gap: 16px; min-height: 0; }
 .h-top { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-height: 0; }
