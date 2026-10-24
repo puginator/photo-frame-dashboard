@@ -2,6 +2,8 @@
 import { custody } from '../custody.js';
 import { CUSTODY, COUNTDOWNS } from '../config.js';
 import { upcoming, when } from '../countdown.js';
+import FACTS from '../animal-facts.js';
+import { pickDaily } from '../daily.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
@@ -73,6 +75,13 @@ import { lunchFor, loadLunch } from '../lunch.js';
     }).join('');
   }
 
+  function factTile() {
+    var f = pickDaily(FACTS, App.now());
+    return '<div class="label">Animal fact</div>' +
+      '<div class="h-fa"><span class="h-fa-e">' + f.emoji + '</span>' +
+      '<div><b>' + App.esc(f.name) + '</b><p>' + App.esc(f.fact) + '</p></div></div>';
+  }
+
   // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
   function todo(title, issue) {
     return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
@@ -86,7 +95,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = lunchTile();
     el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
-    el.querySelector('.h-fact').innerHTML = todo('Animal fact', 5);
+    el.querySelector('.h-fact').innerHTML = factTile();
   }
 
   function photoCaption(s) {
@@ -131,7 +140,10 @@ import { lunchFor, loadLunch } from '../lunch.js';
       V.el.querySelector('.h-custody').innerHTML = custodyTile();
       V.el.querySelector('.h-count').innerHTML = countdowns(); // the custody countdown flips at handoffs
     }
-    if (n.getHours() === 0 && n.getMinutes() === 0) V.el.querySelector('.h-lunch').innerHTML = lunchTile();
+    if (n.getHours() === 0 && n.getMinutes() === 0) {
+      V.el.querySelector('.h-lunch').innerHTML = lunchTile();
+      V.el.querySelector('.h-fact').innerHTML = factTile();
+    }
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
