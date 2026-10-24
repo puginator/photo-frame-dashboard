@@ -11,6 +11,7 @@ import './views/shopping.js';
 import './views/photos.js';
 import './views/control.js';
 import './views/meals.js';
+import './views/news.js';
 import './views/ambient.js';
 import './diag.js';
 
@@ -21,6 +22,12 @@ loadWeather(WEATHER, function (w) { window.DATA.weather = w; window.App.emit('da
 import { loadPhotos } from './photos.js';
 var demoPhotos = window.DATA.photos; // shown until the bucket has photos, and again if it is emptied
 loadPhotos(function (photos) { window.DATA.photos = photos.length ? photos : demoPhotos; window.App.emit('photos'); });
+
+import { loadNews } from './news-sync.js';
+var demoNews = window.DATA.newsAi = [];
+loadNews(window.DATA, function (stories) {
+  if (stories.length) { window.DATA.newsAi = stories; window.App.emit('data'); }
+});
 
 import { loadLiveEvents } from './calendar-sync.js';
 var demoEvents = window.DATA.events; // shown until the Google feed is linked, and if it goes empty
