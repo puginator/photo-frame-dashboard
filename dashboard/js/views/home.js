@@ -87,13 +87,14 @@ import { lunchFor, loadLunch } from '../lunch.js';
   function today() { var n = App.now(); return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2); }
   function savedVotes() { try { return JSON.parse(localStorage.getItem('wyr-votes')); } catch (e) { return null; } }
 
-  // Tap a card to vote; today's tally shows on each card and resets at midnight (js/votes.js).
-  function wyrTile() {
+  // Tap a card to vote. Today's tally (js/votes.js, resets at midnight) shows only to whoever just
+  // voted, for a few seconds, so the next kid votes without seeing which way it's going.
+  function wyrTile(reveal) {
     var q = wyrOfDay(WYR, App.now()), t = tally(savedVotes(), today());
     function card(side, text) {
-      var lead = t[side] > t[side === 'a' ? 'b' : 'a'];
+      var lead = reveal && t[side] > t[side === 'a' ? 'b' : 'a'];
       return '<button class="h-wyr-' + side + (lead ? ' is-lead' : '') + '" data-vote="' + side + '">' +
-        '<span>' + App.esc(text) + '</span><small>' + label(t, side) + '</small></button>';
+        '<span>' + App.esc(text) + '</span><small>' + (reveal ? label(t, side) : 'Tap to vote') + '</small></button>';
     }
     return '<div class="label">Would you rather\u2026</div>' +
       '<div class="h-wyr-opts">' + card('a', q[0]) + '<span class="h-wyr-or serif">or</span>' + card('b', q[1]) + '</div>';
@@ -104,7 +105,9 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (now - (V.lastVote || 0) < 1000) return; // ponytail: 1 s guard against double-taps; each kid still gets a vote
     V.lastVote = now;
     try { localStorage.setItem('wyr-votes', JSON.stringify(addVote(savedVotes(), today(), side))); } catch (e) {}
-    V.el.querySelector('.h-wyr').innerHTML = wyrTile();
+    V.el.querySelector('.h-wyr').innerHTML = wyrTile(true);
+    clearTimeout(V.hideVotes);
+    V.hideVotes = setTimeout(function () { V.el.querySelector('.h-wyr').innerHTML = wyrTile(); }, 4000);
   }
 
   function paint() {
