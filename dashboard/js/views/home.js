@@ -1,4 +1,7 @@
 // Home / Today: the glanceable overview. Never scrolls.
+import { custody } from '../custody.js';
+import { CUSTODY } from '../config.js';
+
 (function () {
   'use strict';
   var D = window.DATA, V = {};
@@ -35,6 +38,14 @@
   }
   App.ring = ring;
 
+  function custodyTile() {
+    var c = custody(App.now(), CUSTODY);
+    return '<div class="label">Tonight</div>' +
+      '<div class="h-cu-who serif">At ' + CUSTODY.names[c.tonight] + '\u2019s</div>' +
+      '<div class="h-cu-detail">' + App.esc(c.detail) + '</div>' +
+      '<div class="h-cu-next"><b>Tomorrow</b>' + App.esc(c.tomorrow.detail) + '</div>';
+  }
+
   // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
   function todo(title, issue) {
     return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
@@ -45,7 +56,7 @@
     el.querySelector('.h-clock').innerHTML = clock();
     el.querySelector('.h-weather').innerHTML = weather();
     el.querySelector('.h-count').innerHTML = todo('Countdowns', 7);
-    el.querySelector('.h-custody').innerHTML = todo('Tonight', 2);
+    el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = todo('School lunch', 3);
     el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
     el.querySelector('.h-fact').innerHTML = todo('Animal fact', 5);
@@ -84,10 +95,11 @@
     resume: function () { V.slides.start(); },
     hide: function () { if (V.slides) V.slides.stop(); }
   });
-  // Every minute: just the clock (cheap, even while hidden). Weather on the hour.
+  // Every minute: just the clock (cheap, even while hidden). Custody on the half hour (handoffs are), weather on the hour.
   App.on('minute', function (n) {
     if (!V.el || !V.el.firstChild) return;
     V.el.querySelector('.h-clock').innerHTML = clock();
+    if (n.getMinutes() % 30 === 0) V.el.querySelector('.h-custody').innerHTML = custodyTile();
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
