@@ -17,3 +17,7 @@ import './diag.js';
 import { loadWeather } from './weather.js';
 import { WEATHER } from './config.js';
 loadWeather(WEATHER, function (w) { window.DATA.weather = w; window.App.emit('data'); });
+
+import { loadPhotos } from './photos.js';
+var demoPhotos = window.DATA.photos; // shown until the bucket has photos, and again if it is emptied
+loadPhotos(function (photos) { window.DATA.photos = photos.length ? photos : demoPhotos; window.App.emit('photos'); });
