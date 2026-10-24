@@ -21,7 +21,11 @@ import { lunchFor, loadLunch } from '../lunch.js';
     return '<div class="h-wx-top">' +
       '<span class="h-wx-icon">' + App.icon(w.cond, 60) + '</span>' +
       '<span class="h-wx-temp num">' + w.temp + '°</span>' +
-      '<span class="h-wx-meta"><b>' + w.label + '</b><span>H ' + w.hi + '°  L ' + w.lo + '°</span></span>' +
+      '<span class="h-wx-meta"><b>' + w.label + '</b><span>H ' + w.hi + '°  L ' + w.lo + '°</span>' +
+      (w.stale ? '<small>' + w.stale + '</small>' : '') + '</span>' +
+      w.others.map(function (o) {
+        return '<span class="h-wx-other">' + App.icon(o.cond, 22) + '<b class="num">' + o.temp + '°</b><small>' + App.esc(o.name) + '</small></span>';
+      }).join('') +
       '</div>' +
       '<div class="h-wx-say"><b>' + w.summary + '.</b> ' + w.advice + '.</div>' +
       '<div class="h-wx-hours">' + hours.map(function (h) {

@@ -128,31 +128,41 @@
     for (var i = 0; i < D.routines.length; i++) if (h >= D.routines[i].from && h < D.routines[i].to) return D.routines[i];
     return D.routines[2];
   };
+  // Index of the current hour in D.weather's hourly arrays. Real data (js/weather.js) runs 48 h from
+  // midnight of W.day, so a reading fetched yesterday is still right today; demo data is 24 h.
+  function wxHour(W) {
+    var dd = 0;
+    if (W.day) { var p = W.day.split('-'); dd = Math.round((App.dayStart(App.now()) - new Date(+p[0], p[1] - 1, +p[2])) / 864e5); }
+    return (App.now().getHours() + 24 * Math.max(0, Math.min(1, dd))) % W.t.length;
+  }
   App.weatherNow = function () {
-    var W = D.weather, h = App.now().getHours();
+    var W = D.weather, h = wxHour(W), end = h - App.now().getHours() + 24;
     var rainAt = -1;
-    for (var i = h; i < 24; i++) if (W.p[i] >= 50) { rainAt = i; break; }
+    for (var i = h; i < end; i++) if (W.p[i] >= 50) { rainAt = i; break; }
     var summary, advice;
     if (rainAt === h) {
-      var stop = h; while (stop < 24 && W.p[stop] >= 50) stop++;
-      summary = 'Rain until ' + App.fmt.hour(new Date(2000, 0, 1, stop));
+      var stop = h; while (stop < end && W.p[stop] >= 50) stop++;
+      summary = 'Rain until ' + App.fmt.hour(new Date(2000, 0, 1, stop % 24));
       advice = 'Umbrella weather';
     } else if (rainAt > -1) {
-      summary = 'Rain from ' + App.fmt.hour(new Date(2000, 0, 1, rainAt));
+      summary = 'Rain from ' + App.fmt.hour(new Date(2000, 0, 1, rainAt % 24));
       var soccer = App.timedOn(App.now()).filter(function (e) { return /soccer/i.test(e.title) && e.start > App.now(); })[0];
       advice = soccer ? 'Pack a rain jacket for soccer' : 'Grab a rain jacket';
-    } else {
-      summary = W.t[h] < 12 ? 'Clear and cool' : 'Dry all day';
-      advice = W.t[h] < 12 ? 'Jacket weather' : 'Light layers';
     }
     var labels = { sun: 'Sunny', moon: 'Clear', partly: 'Partly cloudy', cloud: 'Overcast', rain: 'Rain' };
-    return { temp: W.t[h], cond: W.c[h], label: labels[W.c[h]], hi: W.hi, lo: W.lo, summary: summary, advice: advice, hour: h };
+    var label = W.l ? W.l[h] : labels[W.c[h]];
+    if (rainAt === -1) {
+      summary = label + (W.t[h] < 54 ? ' and cool' : ', dry all day');
+      advice = W.t[h] < 40 ? 'Bundle up' : W.t[h] < 54 ? 'Jacket weather' : 'Light layers';
+    }
+    var stale = W.updated && App.now() - W.updated > 45 * 60000 ? 'Updated ' + App.fmt.time(new Date(W.updated)) : '';
+    return { temp: W.t[h], cond: W.c[h], label: label, hi: W.hi, lo: W.lo, summary: summary, advice: advice, hour: h % 24, others: W.others || [], stale: stale };
   };
   App.hourly = function (count) {
-    var W = D.weather, h = App.now().getHours(), out = [];
+    var W = D.weather, h = wxHour(W), out = [];
     for (var i = 0; i < count; i++) {
-      var x = (h + i) % 24;
-      out.push({ h: x, t: W.t[x], c: W.c[x], p: W.p[x], label: i === 0 ? 'Now' : ((x % 12 || 12) + (x >= 12 ? 'p' : 'a')) });
+      var x = (h + i) % W.t.length, hr = x % 24;
+      out.push({ h: hr, t: W.t[x], c: W.c[x], p: W.p[x], label: i === 0 ? 'Now' : ((hr % 12 || 12) + (hr >= 12 ? 'p' : 'a')) });
     }
     return out;
   };

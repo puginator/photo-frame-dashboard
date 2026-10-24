@@ -17,3 +17,12 @@ export var CUSTODY = {
     { date: '2026-11-26', night: 'dad', note: 'Thanksgiving: split day' }
   ]
 };
+
+// Weather (Open-Meteo, no key). The first place gets the full tile; the rest show their current temp.
+export var WEATHER = {
+  places: [
+    { name: 'Bellingham', lat: 48.75, lon: -122.48 },
+    { name: 'Everson', lat: 48.92, lon: -122.34 }
+  ],
+  timezone: 'America/Los_Angeles'
+};
