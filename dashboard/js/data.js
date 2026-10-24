@@ -257,10 +257,11 @@ window.DATA = (function () {
     { id: 'night', name: 'Goodnight', icon: 'moon', set: { 'k-pend': 0, 'k-under': 10, 'k-island': 0, 'l-lamp': 0, 'l-ceil': 0, 'l-fire': 0, 'u-hall': 10, 'u-otto': 15, 'e-porch': 0 } }
   ];
 
-  // ---------------------------------------------------------------- weather (index = hour of day)
+  // ---------------------------------------------------------------- weather (index = hour of day, °F)
+  // Demo fallback only; js/weather.js replaces it with Open-Meteo data on load.
   var weather = {
-    hi: 17, lo: 8, feels: -2, humidity: 71, wind: 18,
-    t: [9, 9, 8, 8, 8, 8, 9, 10, 11, 12, 13, 15, 16, 17, 16, 15, 14, 13, 12, 12, 11, 10, 10, 9],
+    hi: 63, lo: 46, feels: 28, humidity: 71, wind: 18,
+    t: [48, 48, 46, 46, 46, 46, 48, 50, 52, 54, 55, 59, 61, 63, 61, 59, 57, 55, 54, 54, 52, 50, 50, 48],
     c: ['moon', 'moon', 'moon', 'moon', 'moon', 'moon', 'partly', 'partly', 'sun', 'sun', 'sun', 'partly', 'partly', 'cloud', 'cloud', 'cloud', 'rain', 'rain', 'rain', 'rain', 'cloud', 'cloud', 'moon', 'moon'],
     p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 10, 20, 25, 40, 80, 90, 70, 55, 20, 10, 0, 0]
   };

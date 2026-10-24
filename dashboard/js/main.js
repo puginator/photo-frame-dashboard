@@ -13,3 +13,7 @@ import './views/control.js';
 import './views/agents.js';
 import './views/ambient.js';
 import './diag.js';
+
+import { loadWeather } from './weather.js';
+import { WEATHER } from './config.js';
+loadWeather(WEATHER, function (w) { window.DATA.weather = w; window.App.emit('data'); });
