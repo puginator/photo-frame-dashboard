@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vite build && wrangler deploy",
-    "test": "node js/custody.test.js && node js/lunch.test.js && node js/weather.test.js && node js/countdown.test.js && node js/animal-facts.test.js && node js/would-you-rather.test.js && node js/votes.test.js && node worker.test.js && node js/photos.test.js"
+    "test": "node js/custody.test.js && node js/lunch.test.js && node js/weather.test.js && node js/countdown.test.js && node js/animal-facts.test.js && node js/would-you-rather.test.js && node js/votes.test.js && node worker.test.js && node js/photos.test.js && node js/chores-core.test.js"
   },
   "devDependencies": {
     "vite": "^8.3.1",
