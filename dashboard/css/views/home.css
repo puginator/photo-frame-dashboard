@@ -38,6 +38,10 @@
 .h-main { grid-column: 1 / 8; display: grid; grid-template-rows: 232px 1fr; gap: 16px; min-height: 0; }
 .h-top { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; min-height: 0; }
 .h-custody, .h-lunch, .h-wyr, .h-fact { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+.h-cu-who { font-size: 64px; line-height: .95; }
+.h-cu-detail { font-size: 21px; line-height: 1.2; }
+.h-cu-next { margin-top: auto; padding-top: 8px; border-top: 2px solid var(--line); font-size: var(--fs-body); color: var(--ink-2); display: flex; gap: 10px; align-items: baseline; }
+.h-cu-next b { font-size: var(--fs-label); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
 .h-todo { font-size: 24px; color: var(--mute); }
 
 /* ---- side column */
