@@ -3,7 +3,9 @@ import { custody } from '../custody.js';
 import { CUSTODY, COUNTDOWNS } from '../config.js';
 import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
-import { pickDaily } from '../daily.js';
+import { pickDaily, wyrOfDay } from '../daily.js';
+import WYR from '../would-you-rather.js';
+import { tally, addVote, label } from '../votes.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
@@ -82,9 +84,30 @@ import { lunchFor, loadLunch } from '../lunch.js';
       '<div><b>' + App.esc(f.name) + '</b><p>' + App.esc(f.fact) + '</p></div></div>';
   }
 
-  // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
-  function todo(title, issue) {
-    return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
+  function today() { var n = App.now(); return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2); }
+  function savedVotes() { try { return JSON.parse(localStorage.getItem('wyr-votes')); } catch (e) { return null; } }
+
+  // Tap a card to vote. Today's tally (js/votes.js, resets at midnight) shows only to whoever just
+  // voted, for a few seconds, so the next kid votes without seeing which way it's going.
+  function wyrTile(reveal) {
+    var q = wyrOfDay(WYR, App.now()), t = tally(savedVotes(), today());
+    function card(side, text) {
+      var lead = reveal && t[side] > t[side === 'a' ? 'b' : 'a'];
+      return '<button class="h-wyr-' + side + (lead ? ' is-lead' : '') + '" data-vote="' + side + '">' +
+        '<span>' + App.esc(text) + '</span><small>' + (reveal ? label(t, side) : 'Tap to vote') + '</small></button>';
+    }
+    return '<div class="label">Would you rather\u2026</div>' +
+      '<div class="h-wyr-opts">' + card('a', q[0]) + '<span class="h-wyr-or serif">or</span>' + card('b', q[1]) + '</div>';
+  }
+
+  function vote(side) {
+    var now = Date.now();
+    if (now - (V.lastVote || 0) < 1000) return; // ponytail: 1 s guard against double-taps; each kid still gets a vote
+    V.lastVote = now;
+    try { localStorage.setItem('wyr-votes', JSON.stringify(addVote(savedVotes(), today(), side))); } catch (e) {}
+    V.el.querySelector('.h-wyr').innerHTML = wyrTile(true);
+    clearTimeout(V.hideVotes);
+    V.hideVotes = setTimeout(function () { V.el.querySelector('.h-wyr').innerHTML = wyrTile(); }, 4000);
   }
 
   function paint() {
@@ -94,7 +117,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     el.querySelector('.h-count').innerHTML = countdowns();
     el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = lunchTile();
-    el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
+    el.querySelector('.h-wyr').innerHTML = wyrTile();
     el.querySelector('.h-fact').innerHTML = factTile();
   }
 
@@ -120,6 +143,8 @@ import { lunchFor, loadLunch } from '../lunch.js';
           '  <div class="h-fact card"></div>' +
           '</div></div>';
         el.addEventListener('click', function (e) {
+          var v = e.target.closest('[data-vote]');
+          if (v) { vote(v.dataset.vote); return; }
           var g = e.target.closest('[data-go]');
           if (g) App.go(g.dataset.go);
         });
@@ -143,6 +168,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (n.getHours() === 0 && n.getMinutes() === 0) {
       V.el.querySelector('.h-lunch').innerHTML = lunchTile();
       V.el.querySelector('.h-fact').innerHTML = factTile();
+      V.el.querySelector('.h-wyr').innerHTML = wyrTile();
     }
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
