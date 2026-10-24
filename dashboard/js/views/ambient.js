@@ -1,17 +1,19 @@
 // Ambient (idle photo frame) and Night (dim red clock) overlays.
+import { nextText } from '../countdown.js';
+import { COUNTDOWNS, CUSTODY } from '../config.js';
+
 (function () {
   'use strict';
   var D = window.DATA, $ = App.$;
   var amb = { show: null }, shiftTimer = null;
 
   function ambientInfo() {
-    var n = App.now(), w = App.weatherNow(), next = App.nextEvent();
+    var n = App.now(), w = App.weatherNow(), next = nextText(n, COUNTDOWNS, CUSTODY);
     return '<div class="amb-clock"><div class="amb-time num">' + App.fmt.time(n, false) + '</div>' +
       '<div class="amb-date">' + App.fmt.day(n) + ', ' + App.fmt.month(n) + ' ' + n.getDate() + '</div></div>' +
       '<div class="amb-right">' +
       '<div class="amb-wx">' + App.icon(w.cond, 44) + '<span class="num">' + w.temp + '°</span><small>' + w.summary + '</small></div>' +
-      (next ? '<div class="amb-next" style="' + App.pstyle(App.evColor(next)) + '"><i></i>' + App.esc(next.title) + ' · ' + App.fmt.time(next.start) + '</div>' : '') +
-      '<div class="amb-who">' + D.people.map(function (p) { return App.avatar(p, 34, p.home ? '' : 'avatar--away'); }).join('') + '</div>' +
+      (next ? '<div class="amb-next">' + App.esc(next) + '</div>' : '') +
       '</div>';
   }
   function nightInfo() {

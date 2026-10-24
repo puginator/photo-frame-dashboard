@@ -25,3 +25,9 @@ export function upcoming(now, list, custody, count) {
     .sort(function (a, b) { return a.days - b.days; })
     .slice(0, count || 3);
 }
+
+// The soonest countdown as one line, e.g. '🎂 Eliza turns 9! · In 6 days'; '' when there is none.
+export function nextText(now, list, custody) {
+  var c = upcoming(now, list, custody, 1)[0];
+  return c ? (c.emoji ? c.emoji + ' ' : '') + c.label + ' · ' + when(c.days) : '';
+}
