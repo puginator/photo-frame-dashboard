@@ -3,7 +3,8 @@ import { custody } from '../custody.js';
 import { CUSTODY, COUNTDOWNS } from '../config.js';
 import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
-import { pickDaily } from '../daily.js';
+import { pickDaily, wyrOfDay } from '../daily.js';
+import WYR from '../would-you-rather.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
@@ -82,9 +83,12 @@ import { lunchFor, loadLunch } from '../lunch.js';
       '<div><b>' + App.esc(f.name) + '</b><p>' + App.esc(f.fact) + '</p></div></div>';
   }
 
-  // ponytail: placeholder until each ticket lands; replace the slot's renderer, not the grid.
-  function todo(title, issue) {
-    return '<div class="label">' + title + '</div><div class="h-todo serif"><i>Coming in #' + issue + '</i></div>';
+  // Read-only for v1: voting comes with the phase 2 interaction work (#9).
+  function wyrTile() {
+    var q = wyrOfDay(WYR, App.now());
+    return '<div class="label">Would you rather\u2026</div>' +
+      '<div class="h-wyr-opts"><div class="h-wyr-a">' + App.esc(q[0]) + '</div>' +
+      '<span class="h-wyr-or serif">or</span><div class="h-wyr-b">' + App.esc(q[1]) + '</div></div>';
   }
 
   function paint() {
@@ -94,7 +98,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     el.querySelector('.h-count').innerHTML = countdowns();
     el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = lunchTile();
-    el.querySelector('.h-wyr').innerHTML = todo('Would you rather', 6);
+    el.querySelector('.h-wyr').innerHTML = wyrTile();
     el.querySelector('.h-fact').innerHTML = factTile();
   }
 
@@ -143,6 +147,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (n.getHours() === 0 && n.getMinutes() === 0) {
       V.el.querySelector('.h-lunch').innerHTML = lunchTile();
       V.el.querySelector('.h-fact').innerHTML = factTile();
+      V.el.querySelector('.h-wyr').innerHTML = wyrTile();
     }
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });

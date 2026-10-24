@@ -8,3 +8,18 @@ function dayNum(d) { return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d
 export function pickDaily(list, date) {
   return list[(dayNum(date) * STRIDE) % list.length];
 }
+
+// Would You Rather (js/would-you-rather.js): the app's dated question on its MM-DD (holidays),
+// otherwise a daily rotation through every question, nudged one step if it would repeat a
+// neighbouring day's dated question.
+function md(d) { return ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+export function wyrOfDay(data, date) {
+  var dated = data.dated[md(date)];
+  if (dated != null) return data.all[dated];
+  var n = data.all.length, i = (dayNum(date) * STRIDE) % n;
+  var y = data.dated[md(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1))];
+  var t = data.dated[md(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1))];
+  if (i === y || i === t) i = (i + 1) % n;
+  return data.all[i];
+}
