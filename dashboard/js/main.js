@@ -21,3 +21,10 @@ loadWeather(WEATHER, function (w) { window.DATA.weather = w; window.App.emit('da
 import { loadPhotos } from './photos.js';
 var demoPhotos = window.DATA.photos; // shown until the bucket has photos, and again if it is emptied
 loadPhotos(function (photos) { window.DATA.photos = photos.length ? photos : demoPhotos; window.App.emit('photos'); });
+
+import { loadLiveEvents } from './calendar-sync.js';
+var demoEvents = window.DATA.events; // shown until the Google feed is linked, and if it goes empty
+loadLiveEvents(window.DATA, function (events) {
+  window.DATA.events = events.length ? events : demoEvents;
+  window.App.emit('data');
+});
