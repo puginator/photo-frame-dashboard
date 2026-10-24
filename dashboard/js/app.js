@@ -122,12 +122,7 @@
     return App.events().filter(function (e) { return e.id === id; })[0];
   };
 
-  // ------------------------------------------------------------ chores + weather helpers
-  App.currentRoutine = function () {
-    var h = App.now().getHours();
-    for (var i = 0; i < D.routines.length; i++) if (h >= D.routines[i].from && h < D.routines[i].to) return D.routines[i];
-    return D.routines[2];
-  };
+  // ------------------------------------------------------------ weather helpers
   // Index of the current hour in D.weather's hourly arrays. Real data (js/weather.js) runs 48 h from
   // midnight of W.day, so a reading fetched yesterday is still right today; demo data is 24 h.
   function wxHour(W) {

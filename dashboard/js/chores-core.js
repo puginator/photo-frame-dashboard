@@ -37,3 +37,43 @@ export function validEntries(e) {
 }
 
 export function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+// Outbox of unsynced entries: { <day>: { <key>: entry } }. A change replaces any queued entry for
+// the same key; a successful POST acks only entries that haven't changed since they were sent.
+export function queue(outbox, day, key, entry) {
+  var out = Object.assign({}, outbox);
+  out[day] = Object.assign({}, out[day]);
+  out[day][key] = entry;
+  return out;
+}
+
+export function ack(outbox, day, sent) {
+  var out = Object.assign({}, outbox), left = Object.assign({}, out[day]);
+  Object.keys(sent).forEach(function (k) { if (left[k] && left[k].at === sent[k].at) delete left[k]; });
+  if (Object.keys(left).length) out[day] = left; else delete out[day];
+  return out;
+}
+
+// true/false: did `kid` finish all her chores on date d? null when she had none (skipped, like a Mom night).
+function finished(list, kid, d, done) {
+  var mine = choresFor(list, d)[kid] || [];
+  if (!mine.length) return null;
+  return mine.every(function (x) { return isDone(done, x.key); });
+}
+
+// Consecutive Dad nights on which `kid` finished everything, counting back from tonight (which
+// counts once it's complete, but doesn't break the streak while still in progress). Nights at Mom's
+// are skipped, not misses. history: { 'YYYY-MM-DD': { done } }; atDad(date) -> boolean.
+export function streak(kid, now, list, history, tonight, atDad) {
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate()), n = 0;
+  if (atDad(today) && finished(list, kid, today, tonight) === true) n++;
+  for (var i = 1; i <= 60; i++) {
+    var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    if (!atDad(d)) continue;
+    var f = finished(list, kid, d, (history[ymd(d)] || {}).done);
+    if (f === null) continue;
+    if (!f) break;
+    n++;
+  }
+  return n;
+}

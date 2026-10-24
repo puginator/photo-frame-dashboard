@@ -50,12 +50,20 @@
 .h-top { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-height: 0; }
 .h-custody, .h-lunch, .h-wyr, .h-fact { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
 .h-cu-who { font-size: 64px; line-height: .95; }
+.h-custody { position: relative; }
+.h-cu-rings { position: absolute; top: 10px; right: 12px; display: flex; gap: 4px; }
+.h-cu-ring { position: relative; width: 32px; height: 32px; }
+.h-cu-ring b { position: absolute; top: 0; left: 0; width: 32px; height: 32px; display: grid; place-items: center; font-size: 13px; font-weight: 800; }
+.h-cu-ring.is-done .ring-bg { fill: var(--c); }
+.h-cu-ring.is-done b { color: var(--c-ink); }
 .h-cu-detail { font-size: 21px; line-height: 1.2; }
-.h-cu-next { margin-top: auto; padding-top: 8px; border-top: 2px solid var(--line); font-size: var(--fs-body); color: var(--ink-2); display: flex; gap: 10px; align-items: baseline; }
+.h-cu-next { margin-top: auto; padding-top: 8px; border-top: 2px solid var(--line); font-size: 18px; line-height: 1.25; color: var(--ink-2); }
+.h-cu-next b { margin-right: 8px; }
 .h-cu-next b { font-size: var(--fs-label); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
 .h-lu-note { align-self: flex-start; font-size: var(--fs-min); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #B45F00; }
 .h-lu-main { font-size: 21px; font-weight: 700; line-height: 1.15; }
 .h-lu-alt { font-size: 17px; line-height: 1.2; color: var(--ink-2); }
+.h-lu-next { display: flex; align-items: baseline; }
 .h-lu-next span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h-lu-main, .h-lu-alt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .h-lu-alt { -webkit-line-clamp: 2; }

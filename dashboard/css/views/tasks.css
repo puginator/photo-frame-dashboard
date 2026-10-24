@@ -59,12 +59,7 @@
 .ch-lane:not([data-lane="otto"]) .ch-alldone { color: var(--c); }
 .ch-lane[data-lane="otto"] .ch-alldone { color: #C98A00; }
 
-.ch-week { padding: 10px 12px 14px; border-top: 1px solid var(--line); flex: none; }
-.ch-week .label { font-size: 12px; margin-bottom: 6px; }
-.ch-week-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-.ch-week-row span { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 800; color: var(--mute); }
-.ch-week-row i { width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--line); }
-.ch-week-row .is-hit i { background: var(--c); box-shadow: none; }
-.ch-week-row .is-today i { box-shadow: inset 0 0 0 3px var(--ink); }
-.ch-week-row .is-today { color: var(--ink); }
-.ch-week-row .is-future i { opacity: .4; }
+.tasks--away { justify-content: center; align-items: flex-start; padding: 0 80px; gap: 14px; }
+.tasks--away h1 { font-size: var(--fs-xl); line-height: 1.05; }
+.tasks--away p { font-size: var(--fs-m); color: var(--ink-2); }
+.ch-fire { display: inline-flex; align-items: center; gap: 2px; margin-left: 10px; font-size: 16px; }

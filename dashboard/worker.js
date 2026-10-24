@@ -64,8 +64,9 @@ async function photo(env, key) {
   return new Response(obj.body, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, max-age=31536000, immutable', ETag: obj.httpEtag } });
 }
 
-// Chores (docs: docs/chores.md). The frame is the only writer and syncs one day at a time, so a
-// read-merge-write per POST is enough; the per-entry merge makes retries and replays harmless.
+// Chores (docs: docs/chores.md). The frame is the only writer and POSTs its whole day doc, so the
+// read-merge-write here is safe even though KV reads can be ~60 s stale; the per-entry merge makes
+// retries and replays harmless.
 // ponytail: KV has no transactions; move day docs to a Durable Object if a second writer appears.
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const KEEP = 60 * 86400; // day docs expire after 60 days (streaks look back that far)

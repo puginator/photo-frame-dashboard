@@ -1,6 +1,8 @@
 // Home / Today: the glanceable overview. Never scrolls.
 import { custody } from '../custody.js';
 import { CUSTODY, COUNTDOWNS } from '../config.js';
+import { choreState } from '../chores.js';
+import { choresFor, isDone } from '../chores-core.js';
 import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
 import { pickDaily, wyrOfDay } from '../daily.js';
@@ -48,9 +50,19 @@ import { lunchFor, loadLunch } from '../lunch.js';
   }
   App.ring = ring;
 
+  // On Dad nights, a ring per girl for tonight's chores (tap to open Chores).
+  function choreRings() {
+    var s = choreState(), lanes = choresFor(s.list, App.now());
+    return '<button class="h-cu-rings" data-go="tasks">' + s.list.kids.map(function (k) {
+      var mine = lanes[k.id], n = mine.filter(function (x) { return isDone(s.done, x.key); }).length, all = mine.length && n === mine.length;
+      return '<span class="h-cu-ring' + (all ? ' is-done' : '') + '" style="' + App.pstyle(k) + '">' + App.ring(n, mine.length || 1, 32) + '<b>' + (all ? '\u2713' : k.name[0]) + '</b></span>';
+    }).join('') + '</button>';
+  }
+
   function custodyTile() {
     var c = custody(App.now(), CUSTODY);
     return '<div class="label">Tonight</div>' +
+      (c.tonight === 'dad' ? choreRings() : '') +
       '<div class="h-cu-who serif">At ' + CUSTODY.names[c.tonight] + '\u2019s</div>' +
       '<div class="h-cu-detail">' + App.esc(c.detail) + '</div>' +
       '<div class="h-cu-next"><b>Tomorrow</b>' + App.esc(c.tomorrow.detail) + '</div>';
@@ -173,4 +185,5 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();
   });
   App.on('data', function () { if (App.current === 'home') paint(); });
+  App.on('chores', function () { if (V.el && V.el.firstChild) V.el.querySelector('.h-custody').innerHTML = custodyTile(); });
 })();
