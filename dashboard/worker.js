@@ -1,5 +1,6 @@
 import { merge, validEntries } from './js/chores-core.js';
 import { parseICS } from './js/ical.js';
+import { pickStories } from './js/ainews.js';
 import SEED_LIST from './chores-list.json' with { type: 'json' };
 
 // Private-by-default gate: the dashboard shows family details (custody, school), so the site 404s
@@ -26,6 +27,7 @@ export default {
     if (!cookies.includes('k=' + key)) return new Response('Not found', { status: 404 });
     if (url.pathname === '/manifest.json') return manifest(env);
     if (url.pathname === '/api/events') return events(req, env);
+    if (url.pathname === '/api/news') return news(req, env);
     if (url.pathname.startsWith('/api/chores/')) return chores(req, env, url.pathname.slice('/api/chores/'.length));
     const m = url.pathname.match(/^\/(photo|thumb)\/(.+\.jpg)$/);
     if (m) return photo(env, (m[1] === 'photo' ? 'photos/' : 'thumbs/') + decodeURIComponent(m[2]));
@@ -104,6 +106,43 @@ async function events(req, env) {
   } catch (e) {
     // Feed unreachable: serve the last good list (even past TTL) rather than an empty calendar.
     return Response.json(cached ? cached.events : [], { headers: noStore });
+  }
+}
+
+// AI headlines (docs: docs/ai-news.md). Hacker News front page + last-7-days AI search via the
+// free Algolia API (no key), filtered and ranked by js/ainews.js, cached in KV for an hour.
+// If the fetch fails, the Worker serves the last good list rather than an empty tab.
+const NEWS_TTL = 3600;
+
+async function hn(path) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch('https://hn.algolia.com/api/v1/' + path, { signal: ctrl.signal });
+    if (!r.ok) throw new Error('hn ' + r.status);
+    return (await r.json()).hits || [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function news(req, env) {
+  if (req.method !== 'GET') return new Response('Method not allowed', { status: 405 });
+  const cached = await env.CHORES.get('news:ai', 'json');
+  if (cached && Date.now() - cached.fetchedAt < NEWS_TTL * 1000) {
+    return Response.json(cached.stories, { headers: noStore });
+  }
+  try {
+    const weekAgo = Math.floor(Date.now() / 1000) - 7 * 86400;
+    const [front, search] = await Promise.all([
+      hn('search?tags=front_page&hitsPerPage=60'),
+      hn('search?query=artificial%20intelligence&tags=story&numericFilters=created_at_i>' + weekAgo + '&hitsPerPage=30'),
+    ]);
+    const stories = pickStories(front.concat(search), 12);
+    await env.CHORES.put('news:ai', JSON.stringify({ fetchedAt: Date.now(), stories }), { expirationTtl: 86400 });
+    return Response.json(stories, { headers: noStore });
+  } catch (e) {
+    return Response.json(cached ? cached.stories : [], { headers: noStore });
   }
 }
 

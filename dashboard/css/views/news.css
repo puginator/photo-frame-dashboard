@@ -1,0 +1,13 @@
+/* AI news — headline list */
+.ain { height: 100%; display: flex; flex-direction: column; }
+.n-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; flex: none; }
+.n-top h1 { font-size: 64px; line-height: .95; }
+.n-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.n-row {
+  display: flex; gap: 16px; align-items: baseline;
+  background: var(--card); border-radius: var(--r); padding: 14px 20px; flex: none;
+}
+.n-points { font-size: 30px; min-width: 64px; text-align: right; color: var(--ink-2); flex: none; }
+.n-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.n-main b { font-size: 22px; line-height: 1.15; }
+.n-main span { font-size: 14px; font-weight: 700; color: var(--mute); }

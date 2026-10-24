@@ -35,4 +35,32 @@ assert.equal(toRecord('photos/IMG_1234.jpg'), null); // a stray upload without t
   const res = await worker.fetch(req, env);
   assert.deepEqual(await res.json(), fresh.events);
 }
+// /api/news serves the KV cache untouched when fresh (no network in tests).
+{
+  const fresh = { fetchedAt: Date.now(), stories: [{ id: '1', title: 'LLMs everywhere', url: 'https://x.test', points: 10, comments: 2, at: Date.now(), host: 'x.test' }] };
+  const env = {
+    FRAME_KEY: 'k',
+    CHORES: { async get() { return fresh; }, async put() { throw new Error('should not refetch'); } },
+  };
+  const req = new Request('https://x/api/news', { headers: { Cookie: 'k=k' } });
+  const res = await worker.fetch(req, env);
+  assert.deepEqual(await res.json(), fresh.stories);
+}
+// /api/news with stale cache and unreachable network serves the stale list.
+{
+  const stale = { fetchedAt: Date.now() - 7200 * 1000, stories: [{ id: '2', title: 'Old AI news', url: 'https://x.test', points: 4, comments: 1, at: 1, host: '' }] };
+  const env = {
+    FRAME_KEY: 'k',
+    CHORES: { async get() { return stale; }, async put() {} },
+  };
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = () => Promise.reject(new Error('offline'));
+  try {
+    const req = new Request('https://x/api/news', { headers: { Cookie: 'k=k' } });
+    const res = await worker.fetch(req, env);
+    assert.deepEqual(await res.json(), stale.stories);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}
 console.log('worker: all checks pass');
