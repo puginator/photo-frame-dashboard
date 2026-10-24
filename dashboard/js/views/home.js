@@ -5,6 +5,7 @@ import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
 import { pickDaily, wyrOfDay } from '../daily.js';
 import WYR from '../would-you-rather.js';
+import { tally, addVote, label } from '../votes.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 
 (function () {
@@ -83,12 +84,27 @@ import { lunchFor, loadLunch } from '../lunch.js';
       '<div><b>' + App.esc(f.name) + '</b><p>' + App.esc(f.fact) + '</p></div></div>';
   }
 
-  // Read-only for v1: voting comes with the phase 2 interaction work (#9).
+  function today() { var n = App.now(); return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2); }
+  function savedVotes() { try { return JSON.parse(localStorage.getItem('wyr-votes')); } catch (e) { return null; } }
+
+  // Tap a card to vote; today's tally shows on each card and resets at midnight (js/votes.js).
   function wyrTile() {
-    var q = wyrOfDay(WYR, App.now());
+    var q = wyrOfDay(WYR, App.now()), t = tally(savedVotes(), today());
+    function card(side, text) {
+      var lead = t[side] > t[side === 'a' ? 'b' : 'a'];
+      return '<button class="h-wyr-' + side + (lead ? ' is-lead' : '') + '" data-vote="' + side + '">' +
+        '<span>' + App.esc(text) + '</span><small>' + label(t, side) + '</small></button>';
+    }
     return '<div class="label">Would you rather\u2026</div>' +
-      '<div class="h-wyr-opts"><div class="h-wyr-a">' + App.esc(q[0]) + '</div>' +
-      '<span class="h-wyr-or serif">or</span><div class="h-wyr-b">' + App.esc(q[1]) + '</div></div>';
+      '<div class="h-wyr-opts">' + card('a', q[0]) + '<span class="h-wyr-or serif">or</span>' + card('b', q[1]) + '</div>';
+  }
+
+  function vote(side) {
+    var now = Date.now();
+    if (now - (V.lastVote || 0) < 1000) return; // ponytail: 1 s guard against double-taps; each kid still gets a vote
+    V.lastVote = now;
+    try { localStorage.setItem('wyr-votes', JSON.stringify(addVote(savedVotes(), today(), side))); } catch (e) {}
+    V.el.querySelector('.h-wyr').innerHTML = wyrTile();
   }
 
   function paint() {
@@ -124,6 +140,8 @@ import { lunchFor, loadLunch } from '../lunch.js';
           '  <div class="h-fact card"></div>' +
           '</div></div>';
         el.addEventListener('click', function (e) {
+          var v = e.target.closest('[data-vote]');
+          if (v) { vote(v.dataset.vote); return; }
           var g = e.target.closest('[data-go]');
           if (g) App.go(g.dataset.go);
         });

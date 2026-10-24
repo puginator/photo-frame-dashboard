@@ -64,7 +64,11 @@
 .h-fa b { display: block; font-size: 22px; font-weight: 800; margin-bottom: 4px; }
 .h-fa p { font-size: 19px; line-height: 1.3; color: var(--ink-2); }
 .h-wyr-opts { flex: 1; display: flex; align-items: stretch; gap: 12px; min-height: 0; }
-.h-wyr-a, .h-wyr-b { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 100px; padding: 18px; border-radius: var(--r-s); font-size: 22px; font-weight: 600; line-height: 1.25; }
+.h-wyr-a, .h-wyr-b { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; min-height: 100px; padding: 18px; border-radius: var(--r-s); font-size: 22px; font-weight: 600; line-height: 1.25; transition: transform .12s var(--ease); }
+.h-wyr-a:active, .h-wyr-b:active { transform: scale(.96); }
+.h-wyr-a small, .h-wyr-b small { font-size: var(--fs-label); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.h-wyr-a.is-lead { background: rgba(255, 107, 107, .34); }
+.h-wyr-b.is-lead { background: rgba(78, 205, 196, .42); }
 .h-wyr-a { background: rgba(255, 107, 107, .16); }
 .h-wyr-b { background: rgba(78, 205, 196, .2); }
 .h-wyr-or { align-self: center; font-size: 30px; font-style: italic; color: var(--mute); }
