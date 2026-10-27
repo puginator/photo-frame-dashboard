@@ -64,6 +64,9 @@
 .h-lu-main { font-size: 21px; font-weight: 700; line-height: 1.15; }
 .h-lu-alt { font-size: 17px; line-height: 1.2; color: var(--ink-2); }
 .h-lu-next { display: flex; align-items: baseline; }
+.h-el { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 16px; color: var(--ink-2); }
+.h-el-i { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.h-el-i b { color: var(--ink); }
 .h-lu-next span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h-lu-main, .h-lu-alt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .h-lu-alt { -webkit-line-clamp: 2; }

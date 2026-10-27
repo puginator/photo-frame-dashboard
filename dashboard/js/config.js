@@ -48,3 +48,11 @@ export var PRINTABLES = {
     { id: 'junia' } // TODO: born year
   ]
 };
+
+// School electives ("specials") by weekday, 1 = Mon .. 5 = Fri; a missing day shows nothing.
+// A list alternates week by week, starting with its first entry in the week of `anchor`.
+export var ELECTIVES = [
+  { kids: ['eliza', 'junia'], days: { 1: 'Music', 2: 'PE', 4: 'PE', 5: 'Library' } }, // TODO: Wednesday?
+  // Middle school: every other Wednesday is PE; the week of Oct 28, 2026 is STEAM.
+  { kids: ['amelia'], days: { 1: 'PE', 2: 'PE', 3: ['STEAM', 'PE'], 4: 'STEAM', 5: 'STEAM' }, anchor: '2026-10-28' }
+];
