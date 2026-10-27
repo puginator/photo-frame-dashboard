@@ -63,4 +63,37 @@ assert.equal(toRecord('photos/IMG_1234.jpg'), null); // a stray upload without t
     globalThis.fetch = realFetch;
   }
 }
+// Printables: today's topic from the Wonder Desk bucket; print emails the PDF once set up.
+{
+  const sent = [], store = {};
+  const pdf = new Uint8Array([37, 80, 68, 70]).buffer;
+  const env = {
+    FRAME_KEY: 'k', PRINTER_EMAIL: 'printer@print.test', PRINT_FROM: 'frame@home.test',
+    EMAIL: { async send(m) { sent.push(m); return { messageId: 'm' }; } },
+    WONDER: {
+      async list() { return { objects: [{ key: 'packs/cozy-v1/volcanoes-early.pdf' }, { key: 'packs/cozy-v1/volcanoes-teen.pdf' }] }; },
+      async get(k) { return k === 'packs/cozy-v1/volcanoes-teen.pdf' ? { arrayBuffer: async () => pdf } : null; },
+    },
+    CHORES: {
+      async get(k) { return store[k] ?? null; },
+      async put(k, v) { store[k] = v; },
+    },
+  };
+  const call = (path, body) => worker.fetch(new Request('https://x' + path, body ? { method: 'POST', body: JSON.stringify(body), headers: { Cookie: 'k=k' } } : { headers: { Cookie: 'k=k' } }), env);
+  assert.deepEqual(await (await call('/api/printables?date=2026-10-26')).json(), { date: '2026-10-26', topic: 'volcanoes', title: 'Volcanoes', ready: true });
+  assert.equal((await call('/api/printables?date=nope')).status, 400);
+  const ok = await call('/api/print', { topic: 'volcanoes', band: 'teen' });
+  assert.equal(ok.status, 200);
+  assert.equal(sent[0].to, 'printer@print.test');
+  assert.equal(sent[0].attachments[0].content, pdf);
+  assert.equal(sent[0].attachments[0].filename, 'volcanoes-teen.pdf');
+  assert.equal((await call('/api/print', { topic: 'volcanoes', band: 'middle' })).status, 404); // no such pack
+  assert.equal((await call('/api/print', { topic: '../x', band: 'teen' })).status, 400);
+  assert.equal((await call('/api/print', { topic: 'volcanoes', band: 'adult' })).status, 400);
+  for (let i = 0; i < 9; i++) await call('/api/print', { topic: 'volcanoes', band: 'teen' });
+  assert.equal((await call('/api/print', { topic: 'volcanoes', band: 'teen' })).status, 429); // 10 a day
+  assert.equal(sent.length, 10);
+  delete env.PRINTER_EMAIL;
+  assert.equal((await call('/api/print', { topic: 'volcanoes', band: 'teen' })).status, 503);
+}
 console.log('worker: all checks pass');

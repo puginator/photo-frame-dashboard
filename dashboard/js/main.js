@@ -9,9 +9,9 @@ import './views/calendar.js';
 import './views/tasks.js';
 import './views/shopping.js';
 import './views/photos.js';
-import './views/control.js';
 import './views/meals.js';
 import './views/news.js';
+import './views/print.js';
 import './views/ambient.js';
 import './diag.js';
 

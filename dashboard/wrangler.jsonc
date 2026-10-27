@@ -9,7 +9,13 @@
     "run_worker_first": true
   },
   // Family photos, private: only worker.js reads them (see docs/photos.md).
-  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "home-photos" }],
+  // WONDER: The Wonder Desk's printable packs, read-only from here (see docs/printables.md).
+  "r2_buckets": [
+    { "binding": "PHOTOS", "bucket_name": "home-photos" },
+    { "binding": "WONDER", "bucket_name": "wonder-desk" }
+  ],
+  // Email-print. Secrets: PRINTER_EMAIL (the printer's address), PRINT_FROM (sender on an onboarded domain).
+  "send_email": [{ "name": "EMAIL" }],
   // Chores: chores:list (the list, edited in the Cloudflare dashboard) and chores:<YYYY-MM-DD> (check-offs).
   "kv_namespaces": [{ "binding": "CHORES", "id": "1b028e4eaaa444619cad46c787a39415" }]
 }

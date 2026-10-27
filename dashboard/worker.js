@@ -1,6 +1,7 @@
 import { merge, validEntries } from './js/chores-core.js';
 import { parseICS } from './js/ical.js';
 import { pickStories } from './js/ainews.js';
+import { PACK_PREFIX, BANDS, topicsFromKeys, topicOfDay, titleOf } from './js/printables.js';
 import SEED_LIST from './chores-list.json' with { type: 'json' };
 
 // Private-by-default gate: the dashboard shows family details (custody, school), so the site 404s
@@ -28,6 +29,8 @@ export default {
     if (url.pathname === '/manifest.json') return manifest(env);
     if (url.pathname === '/api/events') return events(req, env);
     if (url.pathname === '/api/news') return news(req, env);
+    if (url.pathname === '/api/printables') return printables(url, env);
+    if (url.pathname === '/api/print') return print(req, env);
     if (url.pathname.startsWith('/api/chores/')) return chores(req, env, url.pathname.slice('/api/chores/'.length));
     const m = url.pathname.match(/^\/(photo|thumb)\/(.+\.jpg)$/);
     if (m) return photo(env, (m[1] === 'photo' ? 'photos/' : 'thumbs/') + decodeURIComponent(m[2]));
@@ -144,6 +147,50 @@ async function news(req, env) {
   } catch (e) {
     return Response.json(cached ? cached.stories : [], { headers: noStore });
   }
+}
+
+// Printables (docs: docs/printables.md). Kids' packs come from The Wonder Desk's private R2 bucket
+// (binding WONDER); "print" emails the PDF to the printer's email-print address. Secrets:
+// PRINTER_EMAIL, and PRINT_FROM on a domain onboarded to Cloudflare Email Sending.
+// ponytail: lists the bucket per request (one key page, ~243 keys); cache in KV if traffic grows.
+const PRINTS_PER_DAY = 10; // stops a tap-happy kid from emptying the paper tray
+const TOPIC = /^[a-z0-9-]+$/;
+
+async function packTopics(env) {
+  const page = await env.WONDER.list({ prefix: PACK_PREFIX, limit: 1000 });
+  return topicsFromKeys(page.objects.map((o) => o.key));
+}
+
+async function printables(url, env) {
+  const day = url.searchParams.get('date') || '';
+  if (!DAY.test(day)) return new Response('Bad date', { status: 400 });
+  const topic = topicOfDay(await packTopics(env), day);
+  if (!topic) return Response.json(null, { headers: noStore });
+  const ready = !!(env.EMAIL && env.PRINTER_EMAIL && env.PRINT_FROM);
+  return Response.json({ date: day, topic, title: titleOf(topic), ready }, { headers: noStore });
+}
+
+async function print(req, env) {
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  if (!env.EMAIL || !env.PRINTER_EMAIL || !env.PRINT_FROM) return new Response('Printing not set up', { status: 503 });
+  let body;
+  try { body = await req.json(); } catch (e) { return new Response('Bad JSON', { status: 400 }); }
+  if (!body || !TOPIC.test(body.topic || '') || !Object.hasOwn(BANDS, body.band)) return new Response('Bad pack', { status: 400 });
+  const obj = await env.WONDER.get(PACK_PREFIX + body.topic + '-' + body.band + '.pdf');
+  if (!obj) return new Response('Not found', { status: 404 });
+  const countKey = 'print:' + new Date().toISOString().slice(0, 10);
+  const count = +((await env.CHORES.get(countKey)) || 0);
+  if (count >= PRINTS_PER_DAY) return new Response('Daily print limit reached', { status: 429 });
+  await env.CHORES.put(countKey, String(count + 1), { expirationTtl: 2 * 86400 });
+  // Email-print services print the body as its own page, so keep it to one space.
+  await env.EMAIL.send({
+    to: env.PRINTER_EMAIL,
+    from: { email: env.PRINT_FROM, name: 'Home HQ' },
+    subject: titleOf(body.topic) + ' · ' + BANDS[body.band],
+    text: ' ',
+    attachments: [{ content: await obj.arrayBuffer(), filename: body.topic + '-' + body.band + '.pdf', type: 'application/pdf', disposition: 'attachment' }],
+  });
+  return Response.json({ ok: true, left: PRINTS_PER_DAY - count - 1 }, { headers: noStore });
 }
 
 // Chores (docs: docs/chores.md). The frame is the only writer and POSTs its whole day doc, so the

@@ -162,50 +162,6 @@ window.DATA = (function () {
   ];
   var usuals = ['Milk 2%', 'Eggs', 'Bananas', 'Bread', 'Apples', 'Coffee beans', 'Greek yogurt', 'Cheddar', 'Butter', 'Baby spinach', 'Chicken thighs', 'Paper towels'];
 
-  // ---------------------------------------------------------------- home control
-  var rooms = [
-    { id: 'kitchen', name: 'Kitchen' },
-    { id: 'living', name: 'Living Room' },
-    { id: 'entry', name: 'Entry + Garage' },
-    { id: 'upstairs', name: 'Upstairs' },
-    { id: 'yard', name: 'Backyard' }
-  ];
-  var devices = [
-    { id: 'k-pend', room: 'kitchen', type: 'light', name: 'Pendants', on: true, level: 80 },
-    { id: 'k-under', room: 'kitchen', type: 'light', name: 'Under Cabinet', on: true, level: 55 },
-    { id: 'k-island', room: 'kitchen', type: 'light', name: 'Island', on: false, level: 100 },
-    { id: 'k-speaker', room: 'kitchen', type: 'blind', name: 'Window Shade', pos: 100 },
-    { id: 'l-lamp', room: 'living', type: 'light', name: 'Floor Lamp', on: true, level: 45 },
-    { id: 'l-ceil', room: 'living', type: 'light', name: 'Ceiling', on: false, level: 100 },
-    { id: 'l-blinds', room: 'living', type: 'blind', name: 'Blinds', pos: 60 },
-    { id: 'l-fire', room: 'living', type: 'light', name: 'Mantel', on: false, level: 70 },
-    { id: 'e-door', room: 'entry', type: 'lock', name: 'Front Door', locked: true },
-    { id: 'e-porch', room: 'entry', type: 'light', name: 'Porch', on: true, level: 100 },
-    { id: 'g-door', room: 'entry', type: 'garage', name: 'Garage', state: 'closed' },
-    { id: 'g-side', room: 'entry', type: 'lock', name: 'Side Door', locked: true },
-    { id: 'u-amelia', room: 'upstairs', type: 'light', name: "Amelia's Lamp", on: true, level: 30 },
-    { id: 'u-junia', room: 'upstairs', type: 'light', name: "Junia's Nightlight", on: false, level: 15 },
-    { id: 'u-hall', room: 'upstairs', type: 'light', name: 'Hallway', on: false, level: 60 },
-    { id: 'u-bath', room: 'upstairs', type: 'light', name: 'Bathroom', on: false, level: 100 },
-    { id: 'y-string', room: 'yard', type: 'light', name: 'String Lights', on: false, level: 100, flaky: true },
-    { id: 'y-back', room: 'yard', type: 'lock', name: 'Back Door', locked: true },
-    { id: 'y-flood', room: 'yard', type: 'light', name: 'Floodlight', on: false, level: 100 }
-  ];
-  var climate = { current: 20.5, set: 21.5, mode: 'heat', humidity: 42, outside: 14 };
-  var media = { room: 'Kitchen', title: 'Harvest Moon', artist: 'Neil Young', playing: true, volume: 35, seed: 'harvest-vinyl' };
-  var cameras = [
-    { id: 'c-front', name: 'Front Porch', seed: 'porch-steps' },
-    { id: 'c-drive', name: 'Driveway', seed: 'driveway-maple' },
-    { id: 'c-yard', name: 'Backyard', seed: 'garden-yard' }
-  ];
-  var scenes = [
-    { id: 'morning', name: 'Morning', icon: 'sunrise', set: { 'k-pend': 100, 'k-under': 80, 'l-blinds': 100, 'l-lamp': 0, 'u-hall': 60 } },
-    { id: 'dinner', name: 'Dinner', icon: 'utensils', set: { 'k-pend': 55, 'k-under': 30, 'k-island': 70, 'l-lamp': 40, 'l-ceil': 0 } },
-    { id: 'movie', name: 'Movie', icon: 'film', set: { 'k-pend': 0, 'k-under': 15, 'k-island': 0, 'l-lamp': 15, 'l-ceil': 0, 'l-blinds': 0, 'l-fire': 30 } },
-    { id: 'away', name: 'Away', icon: 'away', set: { 'k-pend': 0, 'k-under': 0, 'k-island': 0, 'l-lamp': 0, 'l-ceil': 0, 'l-fire': 0, 'u-amelia': 0, 'u-hall': 0, 'e-porch': 100 } },
-    { id: 'night', name: 'Goodnight', icon: 'moon', set: { 'k-pend': 0, 'k-under': 10, 'k-island': 0, 'l-lamp': 0, 'l-ceil': 0, 'l-fire': 0, 'u-hall': 10, 'u-junia': 15, 'e-porch': 0 } }
-  ];
-
   // ---------------------------------------------------------------- weather (index = hour of day, °F)
   // Demo fallback only; js/weather.js replaces it with Open-Meteo data on load.
   var weather = {
@@ -257,7 +213,6 @@ window.DATA = (function () {
     people: people, family: family, ALL: ALL,
     events: events, busyExtras: busyExtras,
     stores: stores, catOrder: catOrder, groceries: groceries, catalog: catalog, usuals: usuals,
-    rooms: rooms, devices: devices, climate: climate, media: media, cameras: cameras, scenes: scenes,
     weather: weather, photos: photos, meals: meals,
     _gid: function () { return 'g' + (++gid); },
     _eid: function () { return 'e' + (++n); }
