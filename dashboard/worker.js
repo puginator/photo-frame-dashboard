@@ -1,7 +1,7 @@
 import { merge, validEntries } from './js/chores-core.js';
 import { parseICS } from './js/ical.js';
 import { pickStories } from './js/ainews.js';
-import { PACK_PREFIX, BANDS, topicsFromKeys, topicOfDay, titleOf } from './js/printables.js';
+import { PACK_PREFIX, READING_PREFIX, BANDS, topicsFromKeys, topicOfDay, titleOf } from './js/printables.js';
 import SEED_LIST from './chores-list.json' with { type: 'json' };
 
 // Private-by-default gate: the dashboard shows family details (custody, school), so the site 404s
@@ -167,7 +167,10 @@ async function printables(url, env) {
   const topic = topicOfDay(await packTopics(env), day);
   if (!topic) return Response.json(null, { headers: noStore });
   const ready = !!(env.EMAIL && env.PRINTER_EMAIL && env.PRINT_FROM);
-  return Response.json({ date: day, topic, title: titleOf(topic), ready }, { headers: noStore });
+  // Lesson text by band, exported by scripts/export-wonder-reading.mjs. Missing = art + print only.
+  const obj = await env.WONDER.get(READING_PREFIX + topic + '.json');
+  const reading = obj ? await obj.json() : null;
+  return Response.json({ date: day, topic, title: titleOf(topic), ready, reading }, { headers: noStore });
 }
 
 async function print(req, env) {

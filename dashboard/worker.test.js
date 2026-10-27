@@ -72,7 +72,11 @@ assert.equal(toRecord('photos/IMG_1234.jpg'), null); // a stray upload without t
     EMAIL: { async send(m) { sent.push(m); return { messageId: 'm' }; } },
     WONDER: {
       async list() { return { objects: [{ key: 'packs/cozy-v1/volcanoes-early.pdf' }, { key: 'packs/cozy-v1/volcanoes-teen.pdf' }] }; },
-      async get(k) { return k === 'packs/cozy-v1/volcanoes-teen.pdf' ? { arrayBuffer: async () => pdf } : null; },
+      async get(k) {
+        if (k === 'packs/cozy-v1/volcanoes-teen.pdf') return { arrayBuffer: async () => pdf };
+        if (k === 'reading/cozy-v1/volcanoes.json') return { json: async () => ({ early: { title: 'Volcano Friends' } }) };
+        return null;
+      },
     },
     CHORES: {
       async get(k) { return store[k] ?? null; },
@@ -80,7 +84,7 @@ assert.equal(toRecord('photos/IMG_1234.jpg'), null); // a stray upload without t
     },
   };
   const call = (path, body) => worker.fetch(new Request('https://x' + path, body ? { method: 'POST', body: JSON.stringify(body), headers: { Cookie: 'k=k' } } : { headers: { Cookie: 'k=k' } }), env);
-  assert.deepEqual(await (await call('/api/printables?date=2026-10-26')).json(), { date: '2026-10-26', topic: 'volcanoes', title: 'Volcanoes', ready: true });
+  assert.deepEqual(await (await call('/api/printables?date=2026-10-26')).json(), { date: '2026-10-26', topic: 'volcanoes', title: 'Volcanoes', ready: true, reading: { early: { title: 'Volcano Friends' } } });
   assert.equal((await call('/api/printables?date=nope')).status, 400);
   const ok = await call('/api/print', { topic: 'volcanoes', band: 'teen' });
   assert.equal(ok.status, 200);

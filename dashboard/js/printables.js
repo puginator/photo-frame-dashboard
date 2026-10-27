@@ -2,6 +2,7 @@
 // One Wonder Desk pack a day, read straight from the wonder-desk R2 bucket
 // (packs/cozy-v1/<topic>-<band>.pdf).
 export var PACK_PREFIX = 'packs/cozy-v1/';
+export var READING_PREFIX = 'reading/cozy-v1/'; // <topic>.json: { early, middle, teen } lesson text
 export var BANDS = { early: 'Ages 7–9', middle: 'Ages 10–12', teen: 'Ages 13–15' };
 
 // Bucket keys -> sorted topic ids. Every topic has an -early pack, so that is the index.

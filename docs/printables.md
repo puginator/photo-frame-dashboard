@@ -12,6 +12,21 @@ own address).
   binding `WONDER`), so no Wonder Desk login or API is involved. The cover art
   on the frame comes from the Wonder Desk's public `/art/cozy-v1/<topic>.png`.
 
+## Reading on the frame
+
+Next to the art, the tab shows the lesson itself for the selected band: article, fact box, facts,
+"try this", mission, joke and a tap-to-reveal riddle. The text comes from
+`wonder-desk/reading/cozy-v1/<topic>.json` (`{ early, middle, teen }`), which `/api/printables`
+returns with the topic. Without it, the tab falls back to art + print.
+
+Re-export after the Wonder Desk catalog changes (see the header of
+`dashboard/scripts/export-wonder-reading.mjs`):
+
+```sh
+cd ../daily-spark && npx tsx ../photo-frame-dashboard/dashboard/scripts/export-wonder-reading.mjs /tmp/reading
+# then upload each /tmp/reading/<topic>.json to wonder-desk/reading/cozy-v1/
+```
+
 ## Setup
 
 Email Sending to arbitrary addresses needs the Workers Paid plan.
