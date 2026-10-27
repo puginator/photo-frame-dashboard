@@ -1,5 +1,7 @@
 // Animal facts for the daily tile: one or two kid-friendly sentences each, in our own words.
 // Add to the end freely; order only decides which fact shows on which day.
+// The tile's photo is the lead image of the animal's Wikipedia page (js/animal-photo.js); `wiki`
+// overrides the page title when `name` has no photo there.
 // Emoji must be from 2017 or earlier (Emoji 5.0): the frame's Android 8.1 draws newer ones as boxes.
 export default [
   { name: 'Octopus', emoji: '🐙', fact: 'An octopus has three hearts and blue blood.' },
@@ -70,7 +72,7 @@ export default [
   { name: 'Swan', emoji: '🐦', fact: 'Swans often stay with the same partner for many years.' },
   { name: 'Crow', emoji: '🐦', fact: 'Crows can remember a person’s face for years.' },
   { name: 'Woodpecker', emoji: '🐦', fact: 'Woodpeckers can peck up to 20 times a second.' },
-  { name: 'Leafcutter ant', emoji: '🐜', fact: 'Leafcutter ants grow their own gardens of fungus to eat.' },
+  { name: 'Leafcutter ant', wiki: 'Atta cephalotes', emoji: '🐜', fact: 'Leafcutter ants grow their own gardens of fungus to eat.' },
   { name: 'Giant tortoise', emoji: '🐢', fact: 'Some giant tortoises live more than 150 years.' },
   { name: 'Alligator', emoji: '🐊', fact: 'Alligators grow new teeth whenever old ones fall out, up to about 3,000 in a lifetime.' },
   { name: 'Elephant', emoji: '🐘', fact: 'An elephant’s trunk has tens of thousands of muscles.' },
