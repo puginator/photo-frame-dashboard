@@ -1,10 +1,12 @@
 // Home / Today: the glanceable overview. Never scrolls.
 import { custody } from '../custody.js';
-import { CUSTODY, COUNTDOWNS } from '../config.js';
+import { CUSTODY, COUNTDOWNS, ELECTIVES } from '../config.js';
+import { electivesFor } from '../electives.js';
 import { choreState } from '../chores.js';
 import { choresFor, isDone } from '../chores-core.js';
 import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
+import { animalPhoto } from '../animal-photo.js';
 import { pickDaily, wyrOfDay } from '../daily.js';
 import WYR from '../would-you-rather.js';
 import { tally, addVote, label } from '../votes.js';
@@ -72,11 +74,16 @@ import { lunchFor, loadLunch } from '../lunch.js';
     var l = lunchFor(V.menu || {}, App.now());
     var e = l.today, n = l.next;
     var nextDay = n && (n.date - App.dayStart(App.now()) === 86400000 ? 'Tomorrow' : App.fmt.day(n.date));
-    return '<div class="label">School lunch</div>' +
+    var els = electivesFor(ELECTIVES, App.now());
+    return '<div class="label">' + (els.length ? 'School today' : 'School lunch') + '</div>' +
       (e ? (e.notes ? '<div class="h-lu-note">' + App.esc(e.notes) + '</div>' : '') +
         '<div class="h-lu-main">' + App.esc(e.main) + '</div>' +
         (e.alt ? '<div class="h-lu-alt">or ' + App.esc(e.alt) + '</div>' : '')
         : '<div class="h-todo serif"><i>No school lunch today</i></div>') +
+      (els.length ? '<div class="h-el">' + els.map(function (g) {
+        return '<span class="h-el-i"><span class="dots">' + g.kids.map(function (id) { return '<i style="' + App.pstyle(id) + '"></i>'; }).join('') + '</span>' +
+          App.esc(g.kids.map(function (id) { return App.person(id).name; }).join(' & ')) + ' <b>' + App.esc(g.name) + '</b></span>';
+      }).join('') + '</div>' : '') +
       (n ? '<div class="h-cu-next h-lu-next"><b>' + nextDay + '</b><span>' + App.esc(n.entry.main.split(/:| with | on /)[0]) + '</span></div>' : '');
   }
 
@@ -95,6 +102,22 @@ import { lunchFor, loadLunch } from '../lunch.js';
       '<div class="h-fa"><span class="h-fa-e">' + f.emoji + '</span>' +
       '<div><b>' + App.esc(f.name) + '</b><p>' + App.esc(f.fact) + '</p></div></div>';
   }
+  // Swap the emoji for the Wikipedia photo once it loads (a failed image keeps the emoji).
+  function factPhoto() {
+    var f = pickDaily(FACTS, App.now());
+    animalPhoto(f, function (url) {
+      var slot = V.el && V.el.querySelector('.h-fa-e');
+      if (!slot || pickDaily(FACTS, App.now()) !== f) return;
+      var img = new Image();
+      img.onload = function () {
+        slot.className = 'h-fa-pic'; slot.textContent = ''; slot.appendChild(img);
+        V.el.querySelector('.h-fact .label').textContent = 'Animal fact · Photo: Wikipedia';
+      };
+      img.alt = f.name;
+      img.src = url;
+    });
+  }
+
 
   function today() { var n = App.now(); return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2); }
   function savedVotes() { try { return JSON.parse(localStorage.getItem('wyr-votes')); } catch (e) { return null; } }
@@ -131,6 +154,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     el.querySelector('.h-lunch').innerHTML = lunchTile();
     el.querySelector('.h-wyr').innerHTML = wyrTile();
     el.querySelector('.h-fact').innerHTML = factTile();
+    factPhoto();
   }
 
   function photoCaption(s) {
@@ -180,6 +204,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     if (n.getHours() === 0 && n.getMinutes() === 0) {
       V.el.querySelector('.h-lunch').innerHTML = lunchTile();
       V.el.querySelector('.h-fact').innerHTML = factTile();
+      factPhoto();
       V.el.querySelector('.h-wyr').innerHTML = wyrTile();
     }
     if (n.getMinutes() === 0) V.el.querySelector('.h-weather').innerHTML = weather();

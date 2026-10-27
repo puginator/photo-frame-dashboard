@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { summaryUrl } from './animal-photo.js';
 import facts from './animal-facts.js';
 import { pickDaily } from './daily.js';
 
@@ -17,4 +18,8 @@ for (var i = 0; i < 730; i++) {
   seen.add(f); prev = f;
 }
 assert.equal(seen.size, facts.length);
+// Photo lookup: the page title is the name, or `wiki` when set.
+assert.equal(summaryUrl({ name: 'Sea otter' }), 'https://en.wikipedia.org/api/rest_v1/page/summary/Sea%20otter');
+assert.equal(summaryUrl({ name: 'Leafcutter ant', wiki: 'Atta cephalotes' }), 'https://en.wikipedia.org/api/rest_v1/page/summary/Atta%20cephalotes');
+
 console.log('animal facts: all checks pass');

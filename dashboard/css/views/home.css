@@ -64,11 +64,16 @@
 .h-lu-main { font-size: 21px; font-weight: 700; line-height: 1.15; }
 .h-lu-alt { font-size: 17px; line-height: 1.2; color: var(--ink-2); }
 .h-lu-next { display: flex; align-items: baseline; }
+.h-el { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 16px; color: var(--ink-2); }
+.h-el-i { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.h-el-i b { color: var(--ink); }
 .h-lu-next span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h-lu-main, .h-lu-alt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .h-lu-alt { -webkit-line-clamp: 2; }
 .h-fa { display: flex; gap: 16px; align-items: flex-start; }
 .h-fa-e { font-size: 56px; line-height: 1; flex: none; }
+.h-fa-pic { width: 132px; height: 132px; flex: none; border-radius: 14px; overflow: hidden; background: var(--paper-2); }
+.h-fa-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .h-fa b { display: block; font-size: 22px; font-weight: 800; margin-bottom: 4px; }
 .h-fa p { font-size: 19px; line-height: 1.3; color: var(--ink-2); }
 .h-wyr-opts { flex: 1; display: flex; align-items: stretch; gap: 12px; min-height: 0; }
