@@ -37,3 +37,14 @@ export var COUNTDOWNS = [
   { date: '12-25', label: 'Christmas', emoji: '🎄' },
   { date: '01-01', label: "New Year's Day", emoji: '🎉' }
 ];
+
+// Printables tab (docs/printables.md). born = birth year, used to pick each girl's default reading
+// band (7-9, 10-12, 13-15); the band can still be switched on the frame. Missing = youngest band.
+export var PRINTABLES = {
+  wonderUrl: 'https://the-wonder-desk.austincodez.workers.dev', // public cover art lives here
+  kids: [
+    { id: 'amelia' }, // TODO: born year
+    { id: 'eliza', born: 2017 },
+    { id: 'junia' } // TODO: born year
+  ]
+};
