@@ -8,7 +8,7 @@ import { upcoming, when } from '../countdown.js';
 import FACTS from '../animal-facts.js';
 import { animalPhoto } from '../animal-photo.js';
 import { pickDaily, wyrOfDay } from '../daily.js';
-import WYR from '../would-you-rather.js';
+import WYR from '../wyr.js';
 import { tally, addVote, label } from '../votes.js';
 import { lunchFor, loadLunch } from '../lunch.js';
 

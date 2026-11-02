@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
-import WYR from './would-you-rather.js';
+import WYR from './wyr.js';
 import { wyrOfDay } from './daily.js';
 
 function d(y, m, day, h) { return new Date(y, m - 1, day, h || 9); }
 
-assert.equal(WYR.all.length, 52);
+assert.equal(WYR.all.length, 101);
+assert.notEqual(WYR.all.length % 37, 0, 'deck size must not be a multiple of daily.js STRIDE');
+assert.equal(new Set(WYR.all.map(String)).size, WYR.all.length, 'duplicate card');
 // Holiday questions land on their real date in leap and non-leap years (the app's slots are leap-year).
 assert.match(wyrOfDay(WYR, d(2026, 10, 31))[0], /^Trick-or-treat/);
 assert.match(wyrOfDay(WYR, d(2028, 10, 31))[0], /^Trick-or-treat/);

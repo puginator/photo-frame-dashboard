@@ -1,0 +1,58 @@
+// Would You Rather deck: the generated cards (would-you-rather.js, from Crazy Thoughts) plus our own.
+// Add cards to EXTRA as [optionA, optionB], max 110 chars each. Keep the total deck size off a
+// multiple of 37 (74, 111, ...) or the daily rotation (daily.js STRIDE) only cycles a couple of cards.
+import GENERATED from './would-you-rather.js';
+
+var EXTRA = [
+  ['Have a pet dragon the size of a cat', 'Have a pet cat the size of a dragon'],
+  ['Be able to fly but only as fast as you walk', 'Be able to run as fast as a car but only on tiptoes'],
+  ['Have pancakes for every meal', 'Have pizza for every meal'],
+  ['Live in a treehouse with a zip line to school', 'Live in a houseboat that can go anywhere'],
+  ['Talk to animals but they only complain', 'Talk to plants but they only give compliments'],
+  ['Have hands that are really big', 'Have feet that are really big'],
+  ['Always have to hop instead of walk', 'Always have to skip instead of walk'],
+  ['Have a slide instead of stairs in your house', 'Have a trampoline floor in your bedroom'],
+  ['Be invisible whenever you sneeze', 'Float one foot off the ground whenever you laugh'],
+  ['Eat a whole lemon with a smile', 'Eat a spoonful of hot sauce with a smile'],
+  ['Have a robot that does all your chores', 'Have a robot that does all your homework'],
+  ['Spend a day as a cat doing whatever you want', 'Spend a day as a dog getting belly rubs and treats'],
+  ['Have a snowball fight with a hundred friends', 'Have a water balloon fight with a hundred friends'],
+  ['Never have to sleep but never get bored', 'Sleep anywhere comfortably, even on a bus'],
+  ['Have a hot tub filled with hot chocolate', 'Have a pool filled with strawberry lemonade'],
+  ['Be the smartest kid in school', 'Be the funniest kid in school'],
+  ['Have a magic pencil that draws real things', 'Have a magic camera that photographs the past'],
+  ['Live one year on a farm with baby goats', 'Live one year at the beach with dolphins'],
+  ['Wear pajamas every day to school', 'Wear a superhero cape every day to school'],
+  ['Have a volcano erupt chocolate sauce in your yard', 'Have a geyser shoot lemonade in your yard'],
+  ['Have a gigantic stuffed animal that comes to life', 'Have a tiny pet elephant that fits in your pocket'],
+  ['Be able to breathe underwater', 'Be able to jump as high as a house'],
+  ['Only whisper for a week', 'Only sing everything you say for a week'],
+  ['Have a secret door in your room to a candy shop', 'Have a secret door in your room to a pet zoo'],
+  ['Go on a safari and see lions and giraffes', 'Go on a deep sea trip and see whales and sharks'],
+  ['Make any sandwich appear with a snap', 'Make any dessert appear with a clap'],
+  ['Be able to pause time for ten seconds', 'Be able to rewind time by ten seconds'],
+  ['Get a free ride on a hot air balloon', 'Get a free ride on a helicopter'],
+  ['Have a unicorn horn that glows when you are happy', 'Have wings that sparkle when you are brave'],
+  ['Eat only crunchy foods forever', 'Eat only soft and squishy foods forever'],
+  ['Build the biggest blanket fort ever', 'Build the biggest sandcastle ever'],
+  ['Have a pet octopus that does magic tricks', 'Have a pet parrot that tells great jokes'],
+  ['Have a whole day of no screens and lots of games', 'Have a whole day of screens and no games'],
+  ['Wake up to the smell of fresh cookies every morning', 'Wake up to a gentle puppy kiss every morning'],
+  ['Ride a roller coaster upside down ten times', 'Go down a giant water slide ten times'],
+  ['Be a famous singer', 'Be a famous inventor'],
+  ['Have all your socks always be warm', 'Have all your towels always be warm'],
+  ['Have a dinosaur at the zoo you can ride', 'Have a mammoth at the zoo you can ride'],
+  ['Be able to turn any rain into confetti', 'Be able to turn any snow into cotton candy'],
+  ['Have a swing set that goes super high in your yard', 'Have a hammock that rocks you to sleep in your yard'],
+  ['Meet your favorite author', 'Meet your favorite athlete'],
+  ['Spend a week camping under the stars', 'Spend a week in a fancy hotel with room service'],
+  ['Be able to understand every language', 'Be able to play every instrument'],
+  ['Have a rainbow slide to school every morning', 'Have a magic carpet to school every morning'],
+  ['Have a pizza party with all your friends tonight', 'Have a movie night with all your friends tonight'],
+  ['Have spaghetti hair that smells yummy', 'Have a nose that honks when you sneeze'],
+  ['Get to name a new animal species', 'Get to name a new star in the sky'],
+  ['Be able to hold your breath for an hour', 'Be able to hold a snowflake without it melting'],
+  ['Win a year of free ice cream', 'Win a year of free books']
+];
+
+export default { all: GENERATED.all.concat(EXTRA), dated: GENERATED.dated }; // new cards go last so dated indexes still point at the right cards
