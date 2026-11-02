@@ -129,7 +129,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     function card(side, text) {
       var lead = reveal && t[side] > t[side === 'a' ? 'b' : 'a'];
       return '<button class="h-wyr-' + side + (lead ? ' is-lead' : '') + '" data-vote="' + side + '">' +
-        '<span>' + App.esc(text) + '</span><small>' + (reveal ? label(t, side) : 'Tap to vote') + '</small></button>';
+        '<span>' + App.esc(text) + '</span>' + (reveal ? '<small>' + label(t, side) + '</small>' : '') + '</button>';
     }
     return '<div class="label">Would you rather\u2026</div>' +
       '<div class="h-wyr-opts">' + card('a', q[0]) + '<span class="h-wyr-or serif">or</span>' + card('b', q[1]) + '</div>';
