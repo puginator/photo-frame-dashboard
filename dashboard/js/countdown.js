@@ -1,6 +1,6 @@
 // Countdowns: the next few dates from COUNTDOWNS plus a custody one (from custody.js): while the
-// girls are at Dad's (where the frame is), when they go back to Mom's; otherwise the next weekend at Dad's.
-import { nextDadWeekend, withNow, nextNightWith } from './custody.js';
+// girls are at Dad's (where the frame is), when they go back to Mom's; otherwise when they come back to Dad's (next night with Dad).
+import { withNow, nextNightWith } from './custody.js';
 
 function dayNum(d) { return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
 
@@ -22,9 +22,9 @@ export function upcoming(now, list, custody, count) {
     return { label: c.born ? c.label.replace('{age}', on.getFullYear() - c.born) : c.label, emoji: c.emoji || '', days: dayNum(on) - dayNum(today) };
   });
   if (custody) {
-    var atDad = withNow(now, custody) === 'dad', back = atDad && nextNightWith('mom', now, custody);
-    if (back) all.push({ label: 'Back to ' + custody.names.mom + '’s', emoji: '🎒', days: dayNum(back) - dayNum(today) });
-    else if (!atDad) all.push({ label: 'Weekend at ' + custody.names.dad + '’s', emoji: '🏡', days: dayNum(nextDadWeekend(today, custody)) - dayNum(today) });
+    var atDad = withNow(now, custody) === 'dad', who = atDad ? 'mom' : 'dad', next = nextNightWith(who, now, custody);
+    if (next) all.push(atDad ? { label: 'Back to ' + custody.names.mom + '’s', emoji: '🎒', days: dayNum(next) - dayNum(today) }
+      : { label: 'Back to ' + custody.names.dad + '’s', emoji: '🏡', days: dayNum(next) - dayNum(today) });
   }
   return all.filter(function (c) { return c.days >= 0; })
     .sort(function (a, b) { return a.days - b.days; })

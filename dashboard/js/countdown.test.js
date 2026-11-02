@@ -1,5 +1,5 @@
 // Hand-checked from Sat Oct 24, 2026 (a Dad weekend). While the girls are at Dad's the custody
-// countdown is 'Back to Mom's'; at Mom's it is the next weekend at Dad's.
+// countdown is 'Back to Mom's'; at Mom's it is the next night at Dad's (Wednesday).
 import assert from 'node:assert/strict';
 import { upcoming, when } from './countdown.js';
 import { COUNTDOWNS, CUSTODY } from './config.js';
@@ -11,12 +11,12 @@ function show(xs) { return xs.map(function (x) { return x.label + ' ' + x.days; 
 // At Dad's Sat and Sun (swap), back to Mom's Monday.
 assert.deepEqual(show(upcoming(d('2026-10-24'), COUNTDOWNS, CUSTODY)), ["Back to Mom’s 2", 'Eliza turns 9! 6', 'Halloween 7']);
 assert.deepEqual(show(upcoming(d('2026-10-25'), COUNTDOWNS, CUSTODY)), ["Back to Mom’s 1", 'Eliza turns 9! 5', 'Halloween 6']);
-// Monday: with Dad until the 8 AM handoff, then at Mom's, so the next Dad weekend (Nov 7).
+// Monday: with Dad until the 8 AM handoff, then at Mom's, so the next Dad weekend (Wed Oct 28).
 assert.equal(show(upcoming(at('2026-10-26', 7), COUNTDOWNS, CUSTODY))[0], "Back to Mom’s 0");
-assert.deepEqual(show(upcoming(at('2026-10-26', 9), COUNTDOWNS, CUSTODY)), ['Eliza turns 9! 4', 'Halloween 5', "Weekend at Dad’s 12"]);
+assert.deepEqual(show(upcoming(at('2026-10-26', 9), COUNTDOWNS, CUSTODY)), ["Back to Dad’s 2", 'Eliza turns 9! 4', 'Halloween 5']);
 // Mom-weekend Saturday: Dad until noon.
 assert.deepEqual(show(upcoming(at('2026-10-31', 10), COUNTDOWNS, CUSTODY)).slice(0, 2), ['Halloween 0', "Back to Mom’s 0"]); // ties keep config order
-assert.match(show(upcoming(at('2026-10-31', 13), COUNTDOWNS, CUSTODY)).join('|'), /Weekend at Dad’s 7/);
+assert.match(show(upcoming(at('2026-10-31', 13), COUNTDOWNS, CUSTODY)).join('|'), /Back to Dad’s 4/);
 // Birthday itself, and the age rolls over the next year.
 assert.equal(upcoming(d('2026-10-30'), COUNTDOWNS, null)[0].label, 'Eliza turns 9!');
 assert.equal(upcoming(d('2026-10-30'), COUNTDOWNS, null)[0].days, 0);
