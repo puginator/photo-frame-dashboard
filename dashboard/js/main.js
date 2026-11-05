@@ -30,8 +30,9 @@ loadNews(window.DATA, function (stories) {
 });
 
 import { loadLiveEvents } from './calendar-sync.js';
-var demoEvents = window.DATA.events; // shown until the Google feed is linked, and if it goes empty
+window.DATA.events = [];
+try { window.DATA.events = JSON.parse(localStorage.getItem('familyEvents') || '[]').map(function (e) { e.start = new Date(e.start); e.end = new Date(e.end); return e; }); } catch (e) {}
 loadLiveEvents(window.DATA, function (events) {
-  window.DATA.events = events.length ? events : demoEvents;
+  window.DATA.events = window.DATA.events.filter(function (e) { return !e.live; }).concat(events);
   window.App.emit('data');
 });

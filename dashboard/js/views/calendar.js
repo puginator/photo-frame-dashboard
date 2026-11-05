@@ -1,9 +1,15 @@
+import { CUSTODY, ELECTIVES, COUNTDOWNS } from '../config.js';
+import { nightOf, custody } from '../custody.js';
+import { electivesFor } from '../electives.js';
+import { lunchFor, loadLunch } from '../lunch.js';
+import { upcoming, when } from '../countdown.js';
+
 // Calendar: Today-by-person lanes (default), 3-day, rolling week, month.
 (function () {
   'use strict';
   var D = window.DATA;
   var PX = 72, START = 6, END = 23; // 72px per hour, 6 AM → 11 PM
-  var V = { mode: 'day', date: null, el: null, scroll: null };
+  var V = { mode: 'month', date: null, el: null, scroll: null, menu: {} };
   var MODES = [['day', 'Today'], ['3day', '3 Day'], ['week', 'Week'], ['month', 'Month']];
 
   function y(d) { return ((d.getHours() + d.getMinutes() / 60) - START) * PX; }
@@ -81,6 +87,26 @@
     days.forEach(function (d, i) { if (App.sameDay(d, now)) idx = i; });
     if (idx < 0 || now.getHours() < START || now.getHours() >= END) return '';
     return '<div class="now-line" style="top:' + y(now) + 'px"><span class="num">' + App.fmt.time(now, false) + '</span></div>';
+  }
+
+  function daySummary(day) {
+    var lunch = lunchFor(V.menu, day).today;
+    var electives = electivesFor(ELECTIVES, day);
+    var meal = D.meals.filter(function (m) { return m.day === day.getDay(); })[0];
+    var isToday = App.sameDay(day, App.now());
+    var next = upcoming(day, COUNTDOWNS, CUSTODY).slice(0, 2);
+    var weather = isToday ? App.weatherNow() : null;
+    var rows = [
+      ['Girls tonight', 'At ' + CUSTODY.names[nightOf(day, CUSTODY)] + '’s' + (isToday ? ' · ' + custody(App.now(), CUSTODY).detail : '')],
+      ['School lunch', lunch ? lunch.main + (lunch.alt ? ' · or ' + lunch.alt : '') + (lunch.notes ? ' · ' + lunch.notes : '') : 'No menu listed'],
+      ['Electives', electives.length ? electives.map(function (e) { return e.kids.map(function (id) { return App.person(id).name; }).join(' & ') + ': ' + e.name; }).join(' · ') : 'None listed'],
+      ['Dinner plan (example)', meal ? meal.name + (meal.side ? ' · ' + meal.side : '') : 'Not listed'],
+      ['Coming up', next.length ? next.map(function (c) { return c.label + ' · ' + when(c.days); }).join(' · ') : 'Nothing listed'],
+      ['Weather today', weather ? weather.temp + '° · ' + weather.label + ' · H ' + weather.hi + '° / L ' + weather.lo + '°' : 'See Today for current weather']
+    ];
+    return '<div class="cal-summary">' + rows.map(function (row) {
+      return '<div><span class="label">' + App.esc(row[0]) + '</span><span>' + App.esc(row[1]) + '</span></div>';
+    }).join('') + '</div>';
   }
 
   // ------------------------------------------------------------ Today (lanes per person)
@@ -172,9 +198,12 @@
     for (var i = 0; i < 42; i++) {
       var d = App.addDays(start, i);
       var evs = App.allDayOn(d).concat(App.timedOn(d));
+      var lunch = lunchFor(V.menu, d).today;
+      var dates = COUNTDOWNS.filter(function (c) { return c.date === [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-') || c.date === String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); });
+      var details = '<span class="mo-detail">' + App.esc(CUSTODY.names[nightOf(d, CUSTODY)] + '’s house') + '</span>' + (lunch ? '<span class="mo-detail">Lunch: ' + App.esc(lunch.main) + '</span>' : '') + dates.map(function (c) { return '<span class="mo-detail">' + App.esc(c.label.replace('{age}', d.getFullYear() - c.born)) + '</span>'; }).join('') + evs.slice(0,2).map(function (e) { return '<span class="mo-detail">' + App.esc(e.title) + '</span>'; }).join('');
       var dots = evs.slice(0, 5).map(function (e) { return '<i style="' + App.pstyle(App.evColor(e)) + '"></i>'; }).join('');
       cells += '<button class="mo-cell' + (d.getMonth() !== first.getMonth() ? ' is-out' : '') + (App.sameDay(d, now) ? ' is-today' : '') + '" data-day="' + (+d) + '">' +
-        '<span class="num">' + d.getDate() + '</span><span class="mo-dots">' + dots + (evs.length > 5 ? '<em>+' + (evs.length - 5) + '</em>' : '') + '</span></button>';
+        '<span class="num">' + d.getDate() + '</span>' + details + '<span class="mo-dots">' + dots + (evs.length > 5 ? '<em>+' + (evs.length - 5) + '</em>' : '') + '</span></button>';
     }
     return '<div class="month"><div class="mo-dow">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(function (d) { return '<span class="label">' + d + '</span>'; }).join('') + '</div>' +
       '<div class="mo-grid">' + cells + '</div></div>';
@@ -203,7 +232,7 @@
 
   function render() {
     var body = { day: dayView, '3day': threeDay, week: weekView, month: monthView }[V.mode]();
-    V.el.innerHTML = '<div class="cal cal--' + V.mode + '">' + header() + '<div class="cal-body">' + body + '</div></div>';
+    V.el.innerHTML = '<div class="cal cal--' + V.mode + '">' + header() + daySummary(V.date) + '<div class="cal-body">' + body + '</div></div>';
     var sc = V.el.querySelector('.grid-scroll');
     if (sc) {
       var now = App.now();
@@ -268,7 +297,29 @@
         return '<span class="chip" style="' + App.pstyle(x) + '">' + App.avatar(x, 32) + x.name + '</span>';
       }).join('') + '</div></div>' +
       (e.notes ? '<div class="evs-notes serif">“' + App.esc(e.notes) + '”</div>' : '') +
-      '</div></div>', { cls: 'sheet--event' });
+      (e.birthday ? '<p>Annual family birthday.</p>' : e.live ? '<p>Imported from Google Calendar. Remove this entry in Google Calendar.</p>' : '<div class="sheet-actions"><button class="btn btn--ghost" data-remove>Remove event</button></div>') +
+      '</div></div>', { cls: 'sheet--event', onMount: function (sheet, close) {
+        var remove = sheet.querySelector('[data-remove]');
+        if (!remove) return;
+        remove.addEventListener('click', function () {
+          var index = D.events.indexOf(e);
+          if (index < 0) return;
+          var remaining = D.events.filter(function (item) { return item !== e; });
+          try { localStorage.setItem('familyEvents', JSON.stringify(remaining.filter(function (item) { return !item.live; }))); }
+          catch (err) { App.toast('Could not save removal. Please try again.'); return; }
+          D.events.splice(index, 1); close();
+          if (V.el) render();
+          App.emit('data');
+          App.toast('Removed <b>' + App.esc(e.title) + '</b>', { icon: 'calendar', undo: function () {
+            var restored = D.events.slice(); restored.splice(index, 0, e);
+            try { localStorage.setItem('familyEvents', JSON.stringify(restored.filter(function (item) { return !item.live; }))); }
+            catch (err) { App.toast('Could not restore event. Please try again.'); return; }
+            D.events.splice(index, 0, e);
+            if (V.el) render();
+            App.emit('data');
+          } });
+        });
+      } });
   };
 
   function moreSheet(ids) {
@@ -283,9 +334,24 @@
 
   function addSheet() {
     var now = App.now();
+    var saving = false;
     var st = { who: [], day: 0, time: '15:30', dur: 60, title: '' };
-    var days = [0, 1, 2, 3, 4];
-    var times = [['08:00', '8 AM'], ['12:00', 'Noon'], ['15:30', '3:30 PM'], ['16:30', '4:30 PM'], ['18:00', '6 PM'], ['19:30', '7:30 PM']];
+    var page = 0;
+    function dateChoices() {
+      return [0, 1, 2, 3, 4].map(function (i) {
+        var offset = page + i, d = App.addDays(now, offset);
+        return '<button class="chip' + (offset === st.day ? ' is-on' : '') + '" aria-pressed="' + (offset === st.day) + '" data-dayi="' + offset + '">' + (offset < 2 ? App.fmt.rel(d) : App.fmt.dayShort(d) + ' ' + d.getDate()) + '</button>';
+      }).join('');
+    }
+    function dateLabel() {
+      var first = App.addDays(now, page), last = App.addDays(now, page + 4);
+      return App.fmt.monthShort(first) + ' ' + first.getDate() + ' – ' + App.fmt.monthShort(last) + ' ' + last.getDate() + ', ' + last.getFullYear();
+    }
+    var times = [];
+    for (var hour = 0; hour < 24; hour++) {
+      times.push([('0' + hour).slice(-2) + ':00', (hour % 12 || 12) + (hour < 12 ? ' AM' : ' PM')]);
+      if (hour === 15 || hour === 16 || hour === 19) times.push([hour + ':30', (hour % 12) + ':30 PM']);
+    }
     var ideas = ['Soccer', 'Playdate', 'Dentist', 'Dinner out', 'Swim', 'Birthday party'];
     App.sheet(
       '<div class="sheet-pad add">' +
@@ -295,13 +361,12 @@
       '<div class="label">Who</div><div class="add-who">' + D.people.map(function (p) {
         return '<button class="who-btn" data-who="' + p.id + '" style="' + App.pstyle(p) + '">' + App.avatar(p, 56) + '<span>' + p.name + '</span></button>';
       }).join('') + '<button class="who-btn" data-who="all" style="' + App.pstyle(D.family) + '">' + App.avatar(D.family, 56) + '<span>Everyone</span></button></div>' +
-      '<div class="add-row"><div><div class="label">When</div><div class="chips">' + days.map(function (i) {
-        var d = App.addDays(now, i);
-        return '<button class="chip' + (i === 0 ? ' is-on' : '') + '" data-dayi="' + i + '">' + (i < 2 ? App.fmt.rel(d) : App.fmt.dayShort(d) + ' ' + d.getDate()) + '</button>';
-      }).join('') + '</div></div></div>' +
-      '<div class="add-row"><div><div class="label">Time</div><div class="chips">' + times.map(function (t) {
-        return '<button class="chip' + (t[0] === st.time ? ' is-on' : '') + '" data-time="' + t[0] + '">' + t[1] + '</button>';
-      }).join('') + '</div></div>' +
+      '<div class="add-row"><div><div class="label">When · <span data-date-label>' + dateLabel() + '</span></div>' +
+      '<div class="chips"><button class="chip" data-date-page="-1" disabled aria-label="Earlier dates">← Earlier</button><span class="chips" data-date-choices>' + dateChoices() + '</span><button class="chip" data-date-page="1" aria-label="Later dates">Later →</button></div>' +
+      '<p data-selected-date>Selected: ' + App.fmt.month(now) + ' ' + now.getDate() + ', ' + now.getFullYear() + '</p></div></div>' +
+      '<div class="add-row"><div><label class="label" for="event-time">Time</label><select id="event-time" class="chip" data-event-time>' + times.map(function (t) {
+        return '<option value="' + t[0] + '"' + (t[0] === st.time ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>' +
       '<div><div class="label">Length</div><div class="chips">' + [[30, '30m'], [60, '1h'], [120, '2h']].map(function (t) {
         return '<button class="chip' + (t[0] === st.dur ? ' is-on' : '') + '" data-dur="' + t[0] + '">' + t[1] + '</button>';
       }).join('') + '</div></div></div>' +
@@ -310,9 +375,22 @@
       cls: 'sheet--wide',
       onMount: function (s, close) {
         var input = s.querySelector('[data-f=title]');
+        s.querySelector('[data-event-time]').addEventListener('change', function (ev) { st.time = ev.target.value; });
         s.addEventListener('click', function (ev) {
           var t = ev.target.closest('button');
           if (!t) return;
+          if (t.hasAttribute('data-date-page')) {
+            page = Math.max(0, page + Number(t.dataset.datePage) * 5);
+            s.querySelector('[data-date-choices]').innerHTML = dateChoices();
+            s.querySelector('[data-date-label]').textContent = dateLabel();
+            s.querySelector('[data-date-page="-1"]').disabled = page === 0;
+            return;
+          }
+          if (t.hasAttribute('data-dayi')) {
+            var selected = App.addDays(now, Number(t.dataset.dayi));
+            s.querySelector('[data-selected-date]').textContent = 'Selected: ' + App.fmt.month(selected) + ' ' + selected.getDate() + ', ' + selected.getFullYear();
+            App.$$('[data-dayi]', s).forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
+          }
           if (t.dataset.idea) { input.value = t.dataset.idea; }
           if (t.dataset.who) {
             if (t.dataset.who === 'all') st.who = st.who.length === 4 ? [] : D.ALL.slice();
@@ -328,18 +406,26 @@
             }
           });
           if (t.hasAttribute('data-save')) {
+            if (saving) return;
             var title = input.value.trim() || 'New event';
             var who = st.who.length ? st.who.slice() : ['austin'];
             var start = App.addDays(App.dayStart(now), st.day), p = st.time.split(':');
             start.setHours(+p[0], +p[1]);
             var e = { id: D._eid(), title: title, people: who, start: start, end: new Date(+start + st.dur * 60000) };
+            var duplicate = D.events.some(function (item) {
+              return item.title.trim().toLowerCase() === title.toLowerCase() && +item.start === +e.start && +item.end === +e.end && item.people.slice().sort().join(',') === who.slice().sort().join(',');
+            });
+            if (duplicate) { App.toast('This event is already on the calendar.'); return; }
+            try { localStorage.setItem('familyEvents', JSON.stringify(D.events.filter(function (item) { return !item.live; }).concat([e]))); }
+            catch (err) { App.toast('Could not save event. Please try again.'); return; }
+            saving = true; t.disabled = true;
             D.events.push(e);
             close();
             V.date = App.dayStart(start); V.mode = V.mode === 'month' ? 'day' : V.mode; V.scroll = null;
             render();
             App.emit('data');
             App.toast('Added <b>' + App.esc(title) + '</b> · ' + App.fmt.rel(start) + ' ' + App.fmt.time(start), {
-              icon: 'calendar', undo: function () { D.events.splice(D.events.indexOf(e), 1); render(); App.emit('data'); }
+              icon: 'calendar', undo: function () { D.events.splice(D.events.indexOf(e), 1); localStorage.setItem('familyEvents', JSON.stringify(D.events.filter(function (e) { return !e.live; }))); render(); App.emit('data'); }
             });
           }
         });
@@ -349,12 +435,13 @@
 
   App.register('calendar', {
     show: function (el, opts) {
+      if (!V.date) V.date = App.dayStart(App.now());
       if (!V.el) {
         V.el = el;
         el.addEventListener('click', onClick);
         swipe(el);
+        loadLunch(function (menu) { V.menu = menu; if (App.current === 'calendar') render(); });
       }
-      if (!V.date) V.date = App.dayStart(App.now());
       if (!opts.rerender) V.scroll = null;
       render();
     }

@@ -164,7 +164,10 @@ async function packTopics(env) {
 async function printables(url, env) {
   const day = url.searchParams.get('date') || '';
   if (!DAY.test(day)) return new Response('Bad date', { status: 400 });
-  const topic = topicOfDay(await packTopics(env), day);
+  const topics = await packTopics(env);
+  const previous = url.searchParams.get('different');
+  const choices = topics.filter((t) => t !== previous);
+  const topic = previous && choices.length ? choices[Math.floor(Math.random() * choices.length)] : topicOfDay(topics, day);
   if (!topic) return Response.json(null, { headers: noStore });
   const ready = !!(env.EMAIL && env.PRINTER_EMAIL && env.PRINT_FROM);
   // Lesson text by band, exported by scripts/export-wonder-reading.mjs. Missing = art + print only.
@@ -207,6 +210,27 @@ const noStore = { 'Cache-Control': 'no-store' };
 async function chores(req, env, rest) {
   if (rest === 'list' && req.method === 'GET') {
     return Response.json((await env.CHORES.get('chores:list', 'json')) || SEED_LIST, { headers: noStore });
+  }
+  if (rest === 'list' && req.method === 'POST') {
+    let body;
+    try { body = await req.json(); } catch (e) { return new Response('Bad JSON', { status: 400 }); }
+    const current = (await env.CHORES.get('chores:list', 'json')) || SEED_LIST;
+    const allowed = ['each', 'any', ...current.kids.map(k => k.id)];
+    if (!body || !Array.isArray(body.chores) || body.chores.length > 50 ||
+      new Set(body.chores.map(c => c && c.id)).size !== body.chores.length ||
+      !body.chores.every(c => c && /^[a-z0-9-]{1,40}$/.test(c.id) &&
+        typeof c.title === 'string' && c.title.trim().length > 0 && c.title.length <= 100 &&
+        typeof c.emoji === 'string' && c.emoji.length > 0 && c.emoji.length <= 20 && allowed.includes(c.who) &&
+        (c.period === undefined || c.period === 'morning' || c.period === 'night') &&
+        (c.days === undefined || (Array.isArray(c.days) && c.days.every(d => Number.isInteger(d) && d >= 0 && d <= 6))) &&
+        (c.stars === undefined || (Number.isInteger(c.stars) && c.stars >= 0 && c.stars <= 10))))
+      return new Response('Bad chore list', { status: 400 });
+    const list = { kids: current.kids, chores: body.chores.map(c => ({
+      id: c.id, title: c.title.trim(), emoji: c.emoji, who: c.who,
+      ...(c.period ? { period: c.period } : {}), ...(c.days ? { days: c.days } : {}), ...(c.stars !== undefined ? { stars: c.stars } : {})
+    })) };
+    await env.CHORES.put('chores:list', JSON.stringify(list));
+    return Response.json(list, { headers: noStore });
   }
   if (rest === 'history' && req.method === 'GET') {
     const keys = (await env.CHORES.list({ prefix: 'chores:2' })).keys.map((k) => k.name).sort().slice(-KEEP / 86400);

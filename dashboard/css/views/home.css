@@ -98,3 +98,22 @@
 }
 .h-photo-cap b { font-size: var(--fs-min); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .h-photo-cap span { font-family: var(--serif); font-size: 20px; font-style: italic; }
+
+/* Separate lunch from electives; reserve space for both on the frame. */
+.home > *, .h-main > *, .h-top > *, .h-bottom > * { min-width: 0; }
+.h-main { grid-template-rows: 210px minmax(0, 1fr); }
+.h-top, .h-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; min-height: 0; }
+.h-school { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+.h-school-content { overflow: auto; min-height: 0; }
+.h-school-row { display: grid; gap: 4px; padding: 8px 0; overflow-wrap: anywhere; }
+.h-school-row + .h-school-row { border-top: 1px solid var(--line); }
+.h-school-row span { font-size: 17px; color: var(--ink-2); }
+.h-school-row b { font-size: 22px; line-height: 1.2; }
+.h-lu-content { min-height: 0; overflow: auto; overflow-wrap: anywhere; display: flex; flex-direction: column; gap: 8px; }
+.h-lu-main, .h-lu-alt { display: block; overflow: visible; }
+.h-lu-next { flex: none; flex-wrap: wrap; gap: 4px; }
+.h-lu-next span { white-space: normal; overflow-wrap: anywhere; }
+.h-bottom .h-wyr-opts { flex-direction: column; gap: 6px; }
+/* Size from the wrapped text so longer choices keep their full padding. */
+.h-bottom .h-wyr-a, .h-bottom .h-wyr-b { flex: 1 0 auto; min-height: 0; padding: 10px; font-size: 19px; gap: 6px; overflow-wrap: anywhere; }
+.h-bottom .h-wyr-or { font-size: 20px; line-height: 1; }

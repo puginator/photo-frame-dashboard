@@ -93,3 +93,10 @@ export function toggle(key, by) {
   clearTimeout(S.soon);
   S.soon = setTimeout(flush, 1500); // a burst of taps goes out as one write (KV: 1 write/s per key)
 }
+
+// Only publish edits locally after the shared list has been saved successfully.
+export function saveChores(chores) {
+  return fetch('/api/chores/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chores: chores }) })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (list) { S.list = list; write('chores-list', list); S.cb(); });
+}

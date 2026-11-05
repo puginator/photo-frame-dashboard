@@ -33,6 +33,7 @@ export var WEATHER = {
 export var COUNTDOWNS = [
   { date: '10-30', label: 'Eliza turns {age}!', emoji: '🎂', born: 2017 },
   { date: '10-31', label: 'Halloween', emoji: '🎃' },
+  { date: '2026-11-11', label: 'Veterans Day', emoji: '🇺🇸' },
   { date: '2026-11-26', label: 'Thanksgiving', emoji: '🦃' },
   { date: '12-25', label: 'Christmas', emoji: '🎄' },
   { date: '01-01', label: "New Year's Day", emoji: '🎉' }

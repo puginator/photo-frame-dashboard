@@ -74,17 +74,21 @@ import { lunchFor, loadLunch } from '../lunch.js';
     var l = lunchFor(V.menu || {}, App.now());
     var e = l.today, n = l.next;
     var nextDay = n && (n.date - App.dayStart(App.now()) === 86400000 ? 'Tomorrow' : App.fmt.day(n.date));
-    var els = electivesFor(ELECTIVES, App.now());
-    return '<div class="label">' + (els.length ? 'School today' : 'School lunch') + '</div>' +
+    return '<div class="label">School lunch</div><div class="h-lu-content" tabindex="0" role="region" aria-label="School lunch menu">' +
       (e ? (e.notes ? '<div class="h-lu-note">' + App.esc(e.notes) + '</div>' : '') +
         '<div class="h-lu-main">' + App.esc(e.main) + '</div>' +
         (e.alt ? '<div class="h-lu-alt">or ' + App.esc(e.alt) + '</div>' : '')
-        : '<div class="h-todo serif"><i>No school lunch today</i></div>') +
-      (els.length ? '<div class="h-el">' + els.map(function (g) {
-        return '<span class="h-el-i"><span class="dots">' + g.kids.map(function (id) { return '<i style="' + App.pstyle(id) + '"></i>'; }).join('') + '</span>' +
-          App.esc(g.kids.map(function (id) { return App.person(id).name; }).join(' & ')) + ' <b>' + App.esc(g.name) + '</b></span>';
-      }).join('') + '</div>' : '') +
+        : '<div class="h-todo serif"><i>No school lunch today</i></div>') + '</div>' +
       (n ? '<div class="h-cu-next h-lu-next"><b>' + nextDay + '</b><span>' + App.esc(n.entry.main.split(/:| with | on /)[0]) + '</span></div>' : '');
+  }
+
+  function schoolTile() {
+    var els = ELECTIVES.slice().reverse().map(function (group) { return electivesFor([group], App.now())[0] || { kids: group.kids, name: App.now().getDay() % 6 === 0 ? 'No school' : 'Schedule not listed' }; });
+    return '<div class="label">School today</div><div class="h-school-content">' +
+      (els.length ? els.map(function (g) {
+        return '<div class="h-school-row"><span>' + App.esc(g.kids.map(function (id) { return App.person(id).name; }).join(' & ')) +
+          '</span><b>' + App.esc(g.name) + '</b></div>';
+      }).join('') : '<div class="h-todo serif"><i>No electives today</i></div>') + '</div>';
   }
 
   function countdowns() {
@@ -152,6 +156,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
     el.querySelector('.h-count').innerHTML = countdowns();
     el.querySelector('.h-custody').innerHTML = custodyTile();
     el.querySelector('.h-lunch').innerHTML = lunchTile();
+    el.querySelector('.h-school').innerHTML = schoolTile();
     el.querySelector('.h-wyr').innerHTML = wyrTile();
     el.querySelector('.h-fact').innerHTML = factTile();
     factPhoto();
@@ -171,8 +176,8 @@ import { lunchFor, loadLunch } from '../lunch.js';
           '<div class="h-weather"></div>' +
           '<div class="h-count"></div>' +
           '<div class="h-main">' +
-          '  <div class="h-top"><div class="h-custody card"></div><div class="h-lunch card"></div></div>' +
-          '  <div class="h-wyr card"></div>' +
+          '  <div class="h-top"><div class="h-custody card"></div><div class="h-school card"></div></div>' +
+          '  <div class="h-bottom"><div class="h-lunch card"></div><div class="h-wyr card"></div></div>' +
           '</div>' +
           '<div class="h-side">' +
           '  <button class="h-photo" data-go="photos"><div class="h-photo-stage"></div><div class="h-photo-cap"></div></button>' +
@@ -202,6 +207,7 @@ import { lunchFor, loadLunch } from '../lunch.js';
       V.el.querySelector('.h-count').innerHTML = countdowns(); // the custody countdown flips at handoffs
     }
     if (n.getHours() === 0 && n.getMinutes() === 0) {
+      V.el.querySelector('.h-school').innerHTML = schoolTile();
       V.el.querySelector('.h-lunch').innerHTML = lunchTile();
       V.el.querySelector('.h-fact').innerHTML = factTile();
       factPhoto();

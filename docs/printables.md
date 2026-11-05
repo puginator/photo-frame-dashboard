@@ -5,7 +5,7 @@ email-print (HP ePrint, Epson Email Print, Canon and others give the printer its
 own address).
 
 - One topic a day, the same for everyone,
-  walking the whole catalog. Each girl's chip picks her default reading band
+  chosen pseudo-randomly by date. “Another printable” picks a different topic for the current visit. Each girl's chip picks her default reading band
   (`PRINTABLES.kids[].born` in `js/config.js`), and the band pills switch it
   (7–9, 10–12, 13–15). The Worker reads the finished PDF straight from the Wonder
   Desk's private R2 bucket (`wonder-desk/packs/cozy-v1/<topic>-<band>.pdf`,

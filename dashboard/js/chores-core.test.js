@@ -15,12 +15,16 @@ assert.equal(isDone({ k: done }, 'k'), true);
 assert.equal(isDone({ k: undo }, 'k'), false);
 assert.equal(isDone({}, 'k'), false);
 
-// Lanes from the seed list: three chores every night, five on school nights (Sun–Thu).
+// Lanes from the seed list: three chores every night; school nights add clothes, plus Amelia’s backpack.
 var list = JSON.parse(readFileSync(new URL('../chores-list.json', import.meta.url)));
 var fri = choresFor(list, new Date(2026, 9, 23)), sun = choresFor(list, new Date(2026, 9, 25));
 assert.deepEqual(Object.keys(fri).sort(), ['amelia', 'any', 'eliza', 'junia']);
 assert.equal(fri.eliza.length, 3);
-assert.equal(sun.eliza.length, 5);
+assert.equal(sun.eliza.length, 4);
+assert.equal(sun.junia.length, 4);
+assert.equal(sun.amelia.length, 5);
+assert.ok(!sun.eliza.some(function (x) { return x.chore.id === 'backpack'; }));
+assert.ok(!sun.junia.some(function (x) { return x.chore.id === 'backpack'; }));
 assert.equal(sun.amelia[0].key, 'amelia:clear-table');
 var withAny = { kids: list.kids, chores: [{ id: 'feed-dog', title: 'Feed dog', emoji: '🐕', who: 'any' }, { id: 'piano', title: 'Piano', emoji: '🎹', who: 'junia' }] };
 var lanes = choresFor(withAny, new Date(2026, 9, 23));
@@ -58,6 +62,10 @@ var H = { '2026-10-28': allDoneFor('eliza', 2026, 10, 28), '2026-10-29': allDone
 var wed = new Date(2026, 10, 4, 19);
 // Tonight (11/4) in progress: three Dad nights before the Mom stretch still count.
 assert.equal(streak('eliza', wed, list, H, {}, atDad), 3);
+// Every away night preserves the same count, even with no check-offs.
+for (var awayDay = 31; awayDay <= 34; awayDay++) {
+  assert.equal(streak('eliza', new Date(2026, 9, awayDay, 19), list, H, {}, atDad), 3);
+}
 // Tonight complete: four.
 assert.equal(streak('eliza', wed, list, H, allDoneFor('eliza', 2026, 11, 4).done, atDad), 4);
 // A missed Dad night (Thu 10/29 only half done) resets what came before it.
@@ -68,3 +76,10 @@ assert.equal(streak('junia', wed, list, H, {}, atDad), 0);
 var undone = allDoneFor('eliza', 2026, 10, 30); undone.done['eliza:tidy-room'] = { at: 2, undone: true };
 assert.equal(streak('eliza', wed, list, Object.assign({}, H, { '2026-10-30': undone }), {}, atDad), 0);
 console.log('chores core: all checks pass');
+
+// School mornings apply Monday–Friday; school nights remain Sunday–Thursday.
+var mornings = { kids: list.kids, chores: [{ id: 'morning', title: 'Morning', emoji: '⭐', who: 'each', period: 'morning', days: [1, 2, 3, 4, 5] }] };
+assert.equal(choresFor(mornings, new Date(2026, 9, 25)).eliza.length, 0);
+assert.equal(choresFor(mornings, new Date(2026, 9, 26)).eliza.length, 1);
+assert.equal(choresFor(mornings, new Date(2026, 9, 30)).eliza.length, 1);
+assert.equal(choresFor(mornings, new Date(2026, 9, 31)).eliza.length, 0);

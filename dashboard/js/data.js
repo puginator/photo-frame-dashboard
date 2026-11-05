@@ -22,10 +22,10 @@ window.DATA = (function () {
 
   var people = [
     { id: 'austin', name: 'Austin', color: '#2D5BFF', rgb: '45 91 255', ink: '#FFFFFF', home: true, status: 'Home' },
-    { id: 'jenna', name: 'Jenna', color: '#0EA5E9', rgb: '14 165 233', ink: '#FFFFFF', home: true, status: 'Home' },
-    { id: 'amelia', name: 'Amelia', color: '#7C3AED', rgb: '124 58 237', ink: '#FFFFFF', home: true, status: 'Home' },
-    { id: 'eliza', name: 'Eliza', color: '#E4007C', rgb: '228 0 124', ink: '#FFFFFF', home: true, status: 'Home' },
-    { id: 'junia', name: 'Junia', color: '#00A36C', rgb: '0 163 108', ink: '#FFFFFF', home: true, status: 'Home' }
+    { id: 'jenna', name: 'Jenna', color: '#00A36C', rgb: '0 163 108', ink: '#FFFFFF', home: true, status: 'Home' },
+    { id: 'amelia', name: 'Amelia', color: '#E4007C', rgb: '228 0 124', ink: '#FFFFFF', home: true, status: 'Home' },
+    { id: 'eliza', name: 'Eliza', color: '#0EA5E9', rgb: '14 165 233', ink: '#FFFFFF', home: true, status: 'Home' },
+    { id: 'junia', name: 'Junia', color: '#7C3AED', rgb: '124 58 237', ink: '#FFFFFF', home: true, status: 'Home' }
   ];
   var family = { id: 'family', name: 'Family', color: '#111111', rgb: '17 17 17', ink: '#FFFFFF' };
 
@@ -107,7 +107,7 @@ window.DATA = (function () {
   ];
 
   // ---------------------------------------------------------------- shopping
-  var stores = [{ id: 'grocer', name: 'FreshCo' }, { id: 'costco', name: 'Costco' }];
+  var stores = [{ id: 'grocer', name: 'Everson Market' }, { id: 'costco', name: 'Costco' }];
   var catOrder = {
     all: ['Produce', 'Bakery', 'Meat & Fish', 'Dairy & Eggs', 'Pantry', 'Frozen', 'Snacks', 'Household'],
     grocer: ['Produce', 'Bakery', 'Meat & Fish', 'Dairy & Eggs', 'Pantry', 'Frozen', 'Snacks', 'Household'],
@@ -117,32 +117,8 @@ window.DATA = (function () {
   function g(name, cat, qty, store, done, note) {
     return { id: 'g' + (++gid), name: name, cat: cat, qty: qty, store: store, done: !!done, note: note || '' };
   }
-  var groceries = [
-    g('Bananas', 'Produce', 1, 'grocer', false, 'Bunch, not too ripe'),
-    g('Baby spinach', 'Produce', 1, 'grocer'),
-    g('Avocados', 'Produce', 3, 'grocer'),
-    g('Honeycrisp apples', 'Produce', 6, 'grocer'),
-    g('Sourdough loaf', 'Bakery', 1, 'grocer'),
-    g('Bagels', 'Bakery', 2, 'costco', false, 'Everything'),
-    g('Chicken thighs', 'Meat & Fish', 1, 'grocer', false, 'Boneless'),
-    g('Salmon fillets', 'Meat & Fish', 2, 'grocer'),
-    g('Milk 2%', 'Dairy & Eggs', 2, 'costco'),
-    g('Eggs', 'Dairy & Eggs', 1, 'costco', false, '2 dozen'),
-    g('Greek yogurt', 'Dairy & Eggs', 1, 'grocer'),
-    g('Aged cheddar', 'Dairy & Eggs', 1, 'grocer'),
-    g('Rigatoni', 'Pantry', 2, 'grocer'),
-    g('Olive oil', 'Pantry', 1, 'costco'),
-    g('Coffee beans', 'Pantry', 1, 'grocer', false, 'Dark roast'),
-    g('Frozen peas', 'Frozen', 1, 'grocer'),
-    g('Waffles', 'Frozen', 1, 'grocer'),
-    g('Goldfish crackers', 'Snacks', 1, 'costco'),
-    g('Granola bars', 'Snacks', 1, 'grocer'),
-    g('Paper towels', 'Household', 1, 'costco'),
-    g('Dish soap', 'Household', 1, 'grocer'),
-    g('Lemons', 'Produce', 2, 'grocer', true),
-    g('Butter', 'Dairy & Eggs', 1, 'grocer', true),
-    g('Tortillas', 'Bakery', 1, 'grocer', true)
-  ];
+  var groceries = []; // Add items as needed; favorites below are quick-add suggestions.
+
   var catalog = [
     ['Apples', 'Produce'], ['Avocados', 'Produce'], ['Bananas', 'Produce'], ['Baby spinach', 'Produce'], ['Blueberries', 'Produce'],
     ['Broccoli', 'Produce'], ['Carrots', 'Produce'], ['Cucumber', 'Produce'], ['Garlic', 'Produce'], ['Grapes', 'Produce'],
@@ -160,7 +136,20 @@ window.DATA = (function () {
     ['Popcorn', 'Snacks'], ['Dish soap', 'Household'], ['Dishwasher pods', 'Household'], ['Garbage bags', 'Household'],
     ['Laundry detergent', 'Household'], ['Paper towels', 'Household'], ['Toilet paper', 'Household'], ['Toothpaste', 'Household']
   ];
-  var usuals = ['Milk 2%', 'Eggs', 'Bananas', 'Bread', 'Apples', 'Coffee beans', 'Greek yogurt', 'Cheddar', 'Butter', 'Baby spinach', 'Chicken thighs', 'Paper towels'];
+  var usuals = [
+    ['Rotisserie chicken', 'Meat & Fish', 'costco'], ['Lightly breaded chicken chunks', 'Frozen', 'costco'],
+    ['Goldfish', 'Snacks', 'costco'], ["Pirate's Booty", 'Snacks', 'costco'],
+    ['Kirkland dark chocolate protein bars', 'Snacks', 'costco'], ['Sour cream', 'Dairy & Eggs', 'costco'],
+    ['Ramen', 'Pantry', 'costco'], ['Bacon', 'Meat & Fish', 'costco'],
+    ['Cat food', 'Household', 'costco'], ['Dog food', 'Household', 'costco'],
+    ['Bread', 'Bakery', 'grocer'], ['Lunch meat', 'Meat & Fish', 'grocer'],
+    ['Yogurt', 'Dairy & Eggs', 'grocer'], ['Pretzels', 'Snacks', 'grocer'],
+    ['Apples', 'Produce', 'grocer'], ['Lettuce', 'Produce', 'grocer'], ['Bell peppers', 'Produce', 'grocer'],
+    ['Onion', 'Produce', 'grocer'], ['Coffee creamer', 'Dairy & Eggs', 'grocer'], ['Milk', 'Dairy & Eggs', 'grocer'],
+    ['Cereal', 'Pantry', 'grocer'], ['Chicken', 'Meat & Fish', 'grocer'], ['Chuck roast', 'Meat & Fish', 'grocer'],
+    ['Shredded cheese', 'Dairy & Eggs', 'grocer'], ['Sliced cheese', 'Dairy & Eggs', 'grocer'], ['Hoagie bread', 'Bakery', 'grocer']
+  ];
+  usuals.forEach(function (item) { if (!catalog.some(function (c) { return c[0].toLowerCase() === item[0].toLowerCase(); })) catalog.push(item.slice(0, 2)); });
 
   // ---------------------------------------------------------------- weather (index = hour of day, °F)
   // Demo fallback only; js/weather.js replaces it with Open-Meteo data on load.
@@ -215,6 +204,6 @@ window.DATA = (function () {
     stores: stores, catOrder: catOrder, groceries: groceries, catalog: catalog, usuals: usuals,
     weather: weather, photos: photos, meals: meals,
     _gid: function () { return 'g' + (++gid); },
-    _eid: function () { return 'e' + (++n); }
+    _eid: function () { return 'event-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + (++n); }
   };
 })();

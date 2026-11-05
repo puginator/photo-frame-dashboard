@@ -13,11 +13,12 @@ export function topicsFromKeys(keys) {
     .sort();
 }
 
-// Same topic for everyone all day; walks the catalog one topic per day.
+// Stable pseudo-random topic shared for the day.
 export function topicOfDay(topics, day) {
   if (!topics.length) return null;
-  const n = Math.floor(Date.parse(day + 'T00:00:00Z') / 864e5);
-  return topics[((n % topics.length) + topics.length) % topics.length];
+  let hash = 2166136261;
+  for (const ch of day) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619);
+  return topics[(hash >>> 0) % topics.length];
 }
 
 export function titleOf(topic) {

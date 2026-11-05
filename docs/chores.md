@@ -2,9 +2,17 @@
 
 The Chores page shows tonight's chores for Amelia, Eliza and Junia, only on nights the girls are at
 Dad's (from the custody schedule). Each girl has a lane, plus an *Anyone* lane for shared chores.
-Stars are just for fun, per night.
+Stars are just for fun, per night. Streaks count completed Dad nights: nights away pause the
+streak, and the away screen shows each girl’s paused streak. Completing chores on the next Dad
+night continues it; missing chores on a Dad night breaks it.
 
 ## Change the chore list
+
+Use **Edit chores** on the frame to add, edit or remove chores, choose an emoji, assign a girl
+(or each girl / anyone), and choose every night, school nights (Sunday–Thursday), every morning, or school mornings
+(Monday–Friday). Morning chores show a Morning label. **Add nighttime chores** adds
+a moon-marked chore for each girl; save to enable it. Saving requires a connection and updates
+the shared list. Editing the list also changes which chores count toward historical streaks.
 
 The list lives in Cloudflare KV, key `chores:list` (namespace bound as `CHORES` to `home-dashboard`).
 No deploy needed; the frame picks up changes within an hour.

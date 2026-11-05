@@ -14,15 +14,15 @@ import { BANDS, bandFor } from '../printables.js';
     return bandFor(k && k.born ? App.now().getFullYear() - k.born : 0);
   }
 
-  function load() {
+  function load(different) {
     var day = ymd(App.now());
-    if (V.pack && V.pack.date === day) return;
-    fetch('/api/printables?date=' + day, { cache: 'no-cache' })
+    if (!different && V.pack && V.pack.date === day) return;
+    fetch('/api/printables?date=' + day + (different ? '&different=' + encodeURIComponent(different) : ''), { cache: 'no-cache' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (p) { V.pack = p; V.failed = !p; })
       // Also lands here under plain `npm run dev`, which has no Worker: /api answers with index.html.
       .catch(function () { V.failed = true; })
-      .then(function () { if (App.current === 'print') render(); });
+      .then(function () { if (V.el) render(); });
   }
 
   function send(body, done) {
@@ -74,6 +74,7 @@ import { BANDS, bandFor } from '../printables.js';
     return '<section class="card pr-kids">' +
       '<div class="pr-side">' +
         '<img class="pr-art" alt="" src="' + App.esc(PRINTABLES.wonderUrl + '/art/cozy-v1/' + p.topic + '.png') + '">' +
+        '<button class="btn" data-another>Another printable</button>' +
         '<div class="chips">' + PRINTABLES.kids.map(function (k) {
           var person = App.person(k.id);
           return '<button class="chip' + (k.id === V.kid ? ' is-on' : '') + '" data-kid="' + k.id + '">' + App.esc(person.name) + '</button>';
@@ -98,10 +99,11 @@ import { BANDS, bandFor } from '../printables.js';
   }
 
   function onTap(e) {
-    var t = e.target.closest('[data-kid],[data-band],[data-print],[data-retry],[data-answer]');
+    var t = e.target.closest('[data-kid],[data-band],[data-print],[data-retry],[data-answer],[data-another]');
     if (!t) return;
     // Reveal in place: a re-render would jump the reading pane back to the top.
     if (t.hasAttribute('data-answer')) { t.parentNode.classList.add('is-revealed'); return; }
+    if (t.hasAttribute('data-another') && V.pack) { var previous = V.pack.topic; V.pack = null; V.failed = false; render(); load(previous); return; }
     if (t.hasAttribute('data-retry')) { V.failed = false; render(); load(); return; }
     if (t.dataset.kid) { V.kid = t.dataset.kid; V.band = null; render(); return; }
     if (t.dataset.band) { V.band = t.dataset.band; render(); return; }

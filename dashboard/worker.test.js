@@ -101,3 +101,20 @@ assert.equal(toRecord('photos/IMG_1234.jpg'), null); // a stray upload without t
   assert.equal((await call('/api/print', { topic: 'volcanoes', band: 'teen' })).status, 503);
 }
 console.log('worker: all checks pass');
+
+// Chore editor saves the shared list without allowing family profiles to be replaced.
+{
+  let stored = { kids: [{ id: 'eliza', name: 'Eliza' }], chores: [] };
+  const env = { FRAME_KEY: 'k', CHORES: { async get() { return stored; }, async put(k, v) { stored = JSON.parse(v); } } };
+  const post = body => worker.fetch(new Request('https://x/api/chores/list', { method: 'POST', headers: { Cookie: 'k=k', 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), env);
+  const chore = { id: 'morning', title: 'Morning chores', emoji: '⭐', who: 'eliza', stars: 1, period: 'morning', days: [1, 2, 3, 4, 5] };
+  assert.equal((await post({ kids: [], chores: [chore] })).status, 200);
+  assert.equal(stored.kids[0].id, 'eliza');
+  assert.deepEqual(stored.chores, [chore]);
+  for (const chores of [[{ ...chore, title: '' }], [{ ...chore, who: 'stranger' }], [chore, chore], [{ ...chore, days: [7] }]]) {
+    assert.equal((await post({ chores })).status, 400);
+    assert.deepEqual(stored.chores, [chore]);
+  }
+  assert.equal((await post({ chores: [] })).status, 200);
+  assert.deepEqual(stored.chores, []);
+}

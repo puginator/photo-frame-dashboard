@@ -1,3 +1,4 @@
+import { COUNTDOWNS } from './config.js';
 // Core shell: router, demo clock, idle/ambient, toasts, sheets, helpers.
 (function () {
   'use strict';
@@ -92,6 +93,12 @@
   App.events = function () {
     var list = D.events.slice();
     var today = App.dayStart(App.now());
+    COUNTDOWNS.filter(function (c) { return c.born && /^\d{2}-\d{2}$/.test(c.date); }).forEach(function (c) {
+      for (var year = today.getFullYear() - 1; year <= today.getFullYear() + 2; year++) {
+        var parts = c.date.split('-'), start = new Date(year, +parts[0] - 1, +parts[1]);
+        list.push({ id: 'birthday-' + c.date + '-' + year, title: c.label.replace('{age}', year - c.born), start: start, end: App.addDays(start, 1), allDay: true, birthday: true, people: D.ALL.slice() });
+      }
+    });
     if (App.calMode === 'busy') list = list.concat(D.busyExtras);
     if (App.calMode === 'empty') list = list.filter(function (e) { return e.allDay || !App.sameDay(e.start, today); });
     return list;

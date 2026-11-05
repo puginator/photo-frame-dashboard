@@ -1,6 +1,6 @@
 // Chores: tonight's chores, one lane per girl plus "Anyone", only on nights the girls are at Dad's.
 // State lives in js/chores.js (local-first, synced to KV); the list is edited in KV (docs/chores.md).
-import { choreState, toggle, initChores } from '../chores.js';
+import { choreState, toggle, initChores, saveChores } from '../chores.js';
 import { choresFor, isDone, streak } from '../chores-core.js';
 import { nightOf, nextNightWith } from '../custody.js';
 import { CUSTODY } from '../config.js';
@@ -33,7 +33,7 @@ import { CUSTODY } from '../config.js';
     var on = isDone(done, x.key), c = x.chore, by = on && x.key.indexOf('any:') === 0 ? kid(done[x.key].by, list) : null;
     return '<button class="ch' + (on ? ' is-done' : '') + (V.pending[x.key] ? ' is-checking' : '') + '" data-ch="' + x.key + '">' +
       '<span class="ch-emoji">' + c.emoji + '<span class="ch-check"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span></span>' +
-      '<span class="ch-text"><b>' + App.esc(c.title) + '</b>' +
+      '<span class="ch-text">' + (c.period === 'morning' ? '<small>Morning</small>' : '') + '<b>' + App.esc(c.title) + '</b>' +
       (c.stars || by ? '<small>' + (c.stars ? App.icon('star', 14, 'i--fill') + c.stars : '') + (by ? (c.stars ? ' · ' : 'by ') + App.esc(by.name) : '') + '</small>' : '') +
       '</span></button>';
   }
@@ -52,13 +52,17 @@ import { CUSTODY } from '../config.js';
       '</section>';
   }
 
-  // On nights the girls are at Mom's there is nothing to do here.
+  // Away nights preserve each girl's streak until her next Dad night.
   function away(now) {
-    var back = nextNightWith('dad', now, CUSTODY);
+    var back = nextNightWith('dad', now, CUSTODY), s = choreState();
     var when = !back ? 'soon' : back - App.dayStart(now) === 86400000 ? 'tomorrow' : App.fmt.day(back);
-    return '<div class="tasks tasks--away"><div class="label">Chores</div>' +
+    return '<div class="tasks tasks--away"><button class="btn btn--ghost" data-edit-chores>Edit chores</button><div class="label">Chores</div>' +
       '<h1 class="serif">The girls are at ' + CUSTODY.names.mom + '’s tonight.</h1>' +
-      '<p>Chores are back ' + (when === 'tomorrow' || when === 'soon' ? when : 'on ' + when) + ' night.</p></div>';
+      '<p>Chores are back ' + (when === 'tomorrow' || when === 'soon' ? when : 'on ' + when) + ' night. Streaks are paused until you’re back at Dad’s.</p>' +
+      '<div class="ch-lanes" style="grid-template-columns:repeat(' + s.list.kids.length + ',1fr)">' + s.list.kids.map(function (p) {
+        return '<section class="ch-lane" style="' + App.pstyle(p) + '"><header class="ch-head">' + App.avatar(p, 42) +
+          '<div><b>' + App.esc(p.name) + '</b><span class="ch-sub">Paused' + fire(p.id, s) + '</span></div></header></section>';
+      }).join('') + '</div></div>';
   }
 
   function render() {
@@ -71,7 +75,7 @@ import { CUSTODY } from '../config.js';
     V.el.innerHTML = '<div class="tasks">' +
       '<header class="t-head">' +
       '<div class="t-title"><div class="label">' + App.fmt.day(now) + ' night</div><h1 class="serif">Tonight’s chores</h1></div>' +
-      '<div class="t-progress"><span class="num">' + n + '<small>/' + all.length + '</small></span><div class="t-bar"><i style="width:' + (all.length ? n / all.length * 100 : 0) + '%"></i></div><span class="label">done</span></div>' +
+      '<button class="btn btn--ghost" data-edit-chores>Edit chores</button><div class="t-progress"><span class="num">' + n + '<small>/' + all.length + '</small></span><div class="t-bar"><i style="width:' + (all.length ? n / all.length * 100 : 0) + '%"></i></div><span class="label">done</span></div>' +
       '</header>' +
       '<div class="ch-lanes" style="grid-template-columns:repeat(' + ids.length + ',1fr)">' + ids.map(function (id) { return lane(id, lanes, s); }).join('') + '</div>' +
       '</div>';
@@ -115,7 +119,61 @@ import { CUSTODY } from '../config.js';
     });
   }
 
+  function editChores() {
+    var list = choreState().list, draft = JSON.parse(JSON.stringify(list.chores));
+    function fields(c, i) {
+      return '<div class="ch-editor-row" data-edit-row="' + i + '">' +
+        '<label>Emoji<input data-field="emoji" list="chore-emojis" aria-label="Emoji" maxlength="20" value="' + App.esc(c.emoji) + '"></label>' +
+        '<label>Chore<input data-field="title" aria-label="Chore name" maxlength="100" value="' + App.esc(c.title) + '"></label>' +
+        '<label>Who<select data-field="who">' + [{ id: 'each', name: 'Each girl' }, { id: 'any', name: 'Anyone' }].concat(list.kids).map(function (k) { return '<option value="' + k.id + '"' + (k.id === c.who ? ' selected' : '') + '>' + App.esc(k.name) + '</option>'; }).join('') + '</select></label>' +
+        '<label>When<select data-field="days">' + [
+          ['all', 'Every night', c.period !== 'morning' && !c.days],
+          ['school', 'School nights', c.period !== 'morning' && c.days && c.days.join(',') === '0,1,2,3,4'],
+          ['morning', 'Every morning', c.period === 'morning' && !c.days],
+          ['school-morning', 'School mornings', c.period === 'morning' && c.days && c.days.join(',') === '1,2,3,4,5']
+        ].map(function (option) { return '<option value="' + option[0] + '"' + (option[2] ? ' selected' : '') + '>' + option[1] + '</option>'; }).join('') +
+        (c.days && !((c.period === 'morning' ? '1,2,3,4,5' : '0,1,2,3,4') === c.days.join(',')) ? '<option value="custom" selected>Custom days</option>' : '') + '</select></label>' +
+        '<button class="btn btn--ghost" data-remove-row="' + i + '" aria-label="Remove chore">Remove</button></div>';
+    }
+    App.sheet('<div class="sheet-pad"><div class="label">Your family’s list</div><h2 class="serif sheet-h">Edit chores</h2><p>Choose an emoji, a chore and who does it. Changes also apply when calculating streaks.</p><datalist id="chore-emojis"><option value="🌙"><option value="⭐"><option value="🛏️"><option value="😁"><option value="👕"><option value="🎒"><option value="🍽️"><option value="📚"><option value="🐕"><option value="🧹"></datalist><div data-edit-list>' + draft.map(fields).join('') + '</div><div class="sheet-actions"><button class="btn btn--ghost" data-new-chore>Add chore</button><button class="btn btn--ghost" data-night-chore>Add nighttime chores</button><button class="btn btn--solid" data-save-chores>Save changes</button></div><p data-edit-status role="status"></p></div>', {
+      cls: 'sheet--wide', onMount: function (sheet, close) {
+        var busy = false;
+        function collect() {
+          App.$$('[data-edit-row]', sheet).forEach(function (row) {
+            var c = draft[+row.dataset.editRow];
+            c.title = row.querySelector('[data-field="title"]').value.trim();
+            c.emoji = row.querySelector('[data-field="emoji"]').value.trim();
+            c.who = row.querySelector('[data-field="who"]').value;
+            var days = row.querySelector('[data-field="days"]').value;
+            if (days !== 'custom') c.period = days === 'morning' || days === 'school-morning' ? 'morning' : 'night';
+            if (days === 'all' || days === 'morning') delete c.days;
+            if (days === 'school-morning') c.days = [1, 2, 3, 4, 5];
+            if (days === 'school') c.days = [0, 1, 2, 3, 4];
+          });
+        }
+        sheet.addEventListener('click', function (ev) {
+          var b = ev.target.closest('button');
+          if (!b || busy) return;
+          collect();
+          if (b.hasAttribute('data-new-chore') || b.hasAttribute('data-night-chore')) {
+            if (draft.length >= 50) return;
+            draft.push({ id: 'custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7), title: b.hasAttribute('data-night-chore') ? 'Nighttime chores' : '', emoji: b.hasAttribute('data-night-chore') ? '🌙' : '⭐', who: 'each', stars: 1 });
+          } else if (b.hasAttribute('data-remove-row')) draft.splice(+b.dataset.removeRow, 1);
+          else if (b.hasAttribute('data-save-chores')) {
+            var status = sheet.querySelector('[data-edit-status]');
+            if (draft.some(function (c) { return !c.title || !c.emoji; })) { status.textContent = 'Give every chore a name and emoji.'; return; }
+            busy = true; b.disabled = true; status.textContent = 'Saving…';
+            saveChores(draft).then(function () { close(); App.toast('Chore list saved'); }).catch(function () { busy = false; b.disabled = false; status.textContent = 'Could not save. Check Wi-Fi and try again.'; });
+            return;
+          } else return;
+          sheet.querySelector('[data-edit-list]').innerHTML = draft.map(fields).join('');
+        });
+      }
+    });
+  }
+
   function onClick(e) {
+    if (e.target.closest('[data-edit-chores]')) return editChores();
     var t = e.target.closest('[data-ch]');
     if (!t || V.pending[t.dataset.ch]) return;
     var x = find(t.dataset.ch);

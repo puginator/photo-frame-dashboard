@@ -19,7 +19,7 @@ export function loadLiveEvents(D, cb) {
     fetch('/api/events', { cache: 'no-cache' })
       .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then((list) => {
-        if (!Array.isArray(list) || !list.length) return; // feed unset or empty: keep demo/cached
+        if (!Array.isArray(list)) return; // feed unset or empty: keep demo/cached
         try { localStorage.setItem('liveEvents', JSON.stringify(list)); } catch (e) {}
         use(list);
       })
